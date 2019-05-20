@@ -1,0 +1,245 @@
+{% load generic_filters %}
+{% load stocks_filters %}
+{% with stats_left=stock.get_stock_stats_left stock_prediction=stock.get_predictions %}
+    {% get_stock_subscription_status stock.id as subscription_status %}
+    {% get_no_prediction_text as no_prediction_text %}
+    {% check_if_stock_in_cart stock.id as stock_in_cart %}
+    {% get_stock_fav_status stock.id as fav_status %}
+
+    <div style="margin-top:45px;{% if not stock.coming_soon and subscription_status and stock_prediction and request.user.is_authenticated %}height: 378px;{% else %}{% endif %} {% if not stock_prediction and subscription_status %}height: 378px;{% endif %}width:520px; -webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);margin-bottom:0px;{{ float_position }};"
+         class="m-portlet">
+        <div class="m-portlet__body cardId" data-url="{% url 'stock.single' stock.symbol %}"
+             style="background:#FBFBFB;height:204px;padding-top: 25px;cursor:pointer;">
+            <!--begin::Widget5-->
+
+            <div class="row">
+                <div class="col-xl-8 col-md-8 col-sm-8 col-8">
+                    <h4 class="m-widget24__title"
+                        style="{% if stock.name|length < 29 %}font-size:20px{% else %}font-size:14px{% endif %}">
+                        {{ stock.name }}
+                    </h4>
+                    <div class="m-widget24__desc" style="font-size:12px">
+                        {{ stock.get_stock_company_data.exchange }} <span class="stockSymbol">{{ stock.symbol }}</span>
+                    </div>
+                </div>
+                {#                {% if subscription_status or not stock.has_subscription and not stock_in_cart %}#}
+                {% if subscription_status or not stock.has_subscription and not stock_in_cart %}
+                    <div class="col-xl-2 col-md-2 col-sm-2 col-2"></div>
+                {% endif %}
+                {% if not stock.has_subscription%}
+                    <div class="col-xl-2 col-md-2 col-sm-2 col-2"></div>
+                {% endif %}
+                <div class="col-xl-2 col-md-2 col-sm-2 col-2" style="padding-right:0px;" data-except-class="subButton">
+                    {% if fav_status %}
+                        <button href="#"
+                                {% if request.user.is_authenticated %}
+                                data-fav-trigger
+                                {% endif %}
+                                data-fav-status="1"
+                                data-except-class="subButton"
+                                class="btn btn-info m-btn btn-sm"
+                                data-id="{{ stock.id }}"
+                                {% if not request.user.is_authenticated %}
+                                data-toggle="m-popover"
+                                data-content="Login required"
+                                data-placement="top"
+                                {% endif %}
+                                style="float:left;background-color: transparent; border: none;::hover{background-color: #ff4722}">
+                            <i class="la la-heart" style="font-size: 2.3rem" data-except-class="subButton"></i></button>
+                    {% else %}
+                        <button href="#"
+                                {% if request.user.is_authenticated %}
+                                data-fav-trigger
+                                {% endif %}
+                                data-fav-status="0"
+                                data-except-class="subButton"
+                                class="btn  btn-default m-btn btn-sm"
+                                data-id="{{ stock.id }}"
+                                {% if not request.user.is_authenticated %}
+                                data-toggle="m-popover"
+                                data-content="Login required"
+                                data-placement="top"
+                                {% endif %}
+                                style="float:left;background-color: transparent; border: none;::hover{background-color: #ff4722}">
+                            <i class="la la-heart" data-except-class="subButton"
+                               style="color:transparent;font-size: 2.3rem"></i></button>
+                    {% endif %}
+                </div>
+
+                {% if subscription_status %}
+
+
+                {% elif stock.has_subscription and stock_in_cart %}
+                    <div class="col-xl-2 col-md-2 col-sm-2 col-2" style="padding-left: 0px;">
+                        <a data-except-class="subButton" class="m-btn  btn btn-danger btn-sm" data-subscribe="0"
+                           data-id="{{ stock.id }}" href="{% url 'payment.cart' %}"
+                           role="button" data-id="{{ stock.id }}"
+                                {% if not request.user.is_authenticated %}
+                           data-toggle="m-popover" data-content="Login required" href="{% url 'login' %}"
+                           data-placement="top" style="float: right;"
+                                {% endif %}
+                        >Go to cart</a>
+                    </div>
+                {% elif stock.has_subscription %}
+                    <div class="col-xl-2 col-md-2 col-sm-2 col-2" style="padding-left: 0px;">
+                        <a data-except-class="subButton" class="m-btn  btn btn-danger btn-sm"
+                                {% if request.user.is_authenticated %}
+                           data-add-to-cart-modal href="#" role="button"
+                                {% endif %}
+                           data-already-in-cart="0" data-subscribe="0"
+                           data-id="{{ stock.id }}"
+                           data-symbol="{{ stock.symbol }}"
+                                {% if not request.user.is_authenticated %}
+                           data-toggle="m-popover" data-content="Login required" href="{% url 'login' %}"
+                           data-placement="top" style="float: right;"
+                                {% endif %}
+                        >Subscribe</a>
+                    </div>
+                {% endif %}
+
+            </div>
+            <div class="row">
+                <div class="col-xl-2 col-md-2 col-sm-2 col-2">
+                    <hr size="30" style="margin:0px;margin-top:10px;">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-md-6 col-sm-6 col-6">
+                    <div class="latestPrice"
+                         style="font-size: 30px; color: #707070;font-weight:500;"
+                    >
+                        {{ stats_left.latestPrice|point_round }}
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-md-6 col-sm-6 col-6">
+                    <div class="" style="margin:auto;">
+                        <div class="change"
+                             style="font-size: 18px;
+                                     {% if stats_left.change < 0 %}
+                                         color: #FF0000;
+                                     {% else %}
+                                         color: #009900;
+                                     {% endif %}"
+                             align="left">
+                            <font color="#707070">USD </font> {{ stats_left.changePercent|point_round_percent }}
+                            ({{ stats_left.change|point_round }}%)
+                        </div>
+                        <div class="" align="left"
+                             style="font-size: 13px; color: #6A6A6A;">
+                            Day's Change
+                        </div>
+
+                    </div>
+                </div>
+                {% if stock.coming_soon %}
+                    <div class="col-xl-6 col-md-6 col-sm-6 col-6">
+                        <div class="m-widget24__item">
+                            <h4 class="m-widget24__title" style="margin-top: 20px;font-weight:400;">
+                                Coming Soon
+                            </h4>
+                        </div>
+                    </div>
+                {% else %}
+
+                    <div class="col-xl-3 col-md-3 col-sm-3 col-3" style="text-align: right;padding-right:23px;">
+                        {% if stock.get_all_time_avg %}
+                            <div class="m-widget24__item">
+                                <h4 class="m-widget24__title" style="margin-top: 20px;font-weight:400;font-size: 18px;">
+                                    {{ stock.get_all_time_avg }} %
+                                </h4>
+                                <span class="m-widget24__desc" style="margin-top: 5px;font-size: 10px;">
+				            All time avg. acc
+				        </span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-xl-3 col-md-3 col-sm-3 col-3" style="text-align: right;padding-right:23px;">
+                        {% if stock.get_prev_day_prediction %}
+                            <div class="m-widget24__item">
+                                <h4 class="m-widget24__title" style="margin-top: 20px;font-weight:400;font-size: 18px;">
+                                    {{ stock.get_prev_day_prediction }} %
+                                </h4>
+                                <span class="m-widget24__desc" style="margin-top: 5px;font-size: 10px;">
+				            Previous day
+				        </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% if subscription_status %}
+            {% if not stock.coming_soon and stock_prediction and request.user.is_authenticated %}
+                <div class="m-portlet__body" style="background:white;padding-top:20px;">
+                    <!--begin::Widget5-->
+
+
+                    <h4 class="m-widget24__title" style="font-weight:400;font-size18px;">
+                        Predictions
+                    </h4>
+
+                    <!--end::Widget 5-->
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col">
+                            <div class="m-widget24"
+                                 style="width:128px;height:80px;text-align: left;-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);border-bottom-style: solid;
+    border-bottom-color: #FFA8A8;">
+                                <div class="m-widget24__item" style="padding:18px;">
+                                    <h4 class="m-widget24__title"
+                                        style="margin:auto;font-size:24px;color: #707070;font-weight:200;">
+                                        {{ stock_prediction.low }}
+                                    </h4>
+                                    <div class="m-widget24__desc" style="font-size:13px;margin-left:0px;">
+                                        Low
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="m-widget24"
+                                 style="width:128px;height:80px;text-align: left;-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);border-bottom-style: solid;
+    border-bottom-color: #B9FFA8;">
+                                <div class="m-widget24__item" style="padding:18px;">
+                                    <h4 class="m-widget24__title"
+                                        style="margin:auto;font-size:24px;color: #707070;font-weight:200;">
+                                        {{ stock_prediction.high }}
+                                    </h4>
+                                    <div class="m-widget24__desc" style="font-size:13px;margin-left:0px;">
+                                        High
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="m-widget24"
+                                 style="width:128px;height:80px;text-align: left;-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);border-bottom-style: solid;
+    border-bottom-color: #FFEEA8;">
+                                <div class="m-widget24__item" style="padding:18px;">
+                                    <h4 class="m-widget24__title"
+                                        style="margin:auto;font-size:24px;color: #707070;font-weight:200;">
+                                        {{ stock_prediction.close }}
+                                    </h4>
+                                    <div class="m-widget24__desc" style="font-size:13px;margin-left:0px;">
+                                        Close
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            {% elif not stock_prediction and subscription_status %}
+                <div class="m-portlet__body" style="background:white;padding-top:20px;">
+                    <h4 class="m-widget24__title" style="font-weight:400;font-size18px;">
+                        Predictions
+                    </h4>
+                    {{ no_prediction_text }}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endwith %}

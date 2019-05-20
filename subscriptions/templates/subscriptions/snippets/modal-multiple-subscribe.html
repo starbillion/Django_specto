@@ -1,0 +1,56 @@
+<!--begin::Modal-->
+<div class="modal" id="modalMultipleSubscribeForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">
+					Add to cart	
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">
+						&times;
+					</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div data-add-to-cart-form>
+					<form action="{% url 'add_to_cart' %}" class="hidden">
+						{% csrf_token %}
+						<div class="form-group">
+							<h5 data-symbol>PIH</h5>
+						</div>
+						<div class="form-group">
+							<label>Select a plan duration</label>
+							<select class="form-control" name="plan_duration" data-plans>
+							</select>
+						</div>
+						<div class="form-group">
+							<p><b>Price:</b> $<span data-plan-price>23.32</span></p>
+						</div>
+						<div class="form-group">
+							<input type="hidden" name="quantity" value="1">
+							<input type="hidden" name="product_id" value="">
+							<input type="hidden" name="product_symbol">
+							<input type="submit" name="submit" value="Add to cart" class="btn m-btn btn-success">
+						</div>
+					</form>
+					<div data-invalid-plans class="hidden">
+						<div class="alert alert-danger" role="alert">
+							<strong>
+								Oh snap!
+							</strong><br>
+							No subscription plan found for this Stock. Please try again later.
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">
+					Close
+				</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+<!--end::Modal-->

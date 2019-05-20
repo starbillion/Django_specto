@@ -1,0 +1,11 @@
+<div class="btn-group btn-group-toggle" data-toggle="buttons" style="margin:auto;text-align: center;">
+    <label onclick="window.location='{% url "stock.all"%}'" class="btn btn-new {% if page_name == "view_all_stocks" %}active{% endif %}">
+        <input type="radio" name="options" id="option1" autocomplete="off" checked=""> All Stocks
+    </label>
+    <label onclick="window.location='{% url "stock.gainer_looser"%}'" class="btn btn-new {% if page_name == "gainers_losers" %}active{% endif %}">
+        <input type="radio" name="options" id="option2" autocomplete="off" checked=""> Gainers, Losers, Most active
+    </label>
+    <label onclick="window.location='{% url "stock.most_popular" %}'" class="btn btn-new {% if page_name == "most_popular" %}active{% endif %}">
+        <input type="radio" name="options" id="option3" autocomplete="off" checked=""> Most Popular
+    </label>
+</div>

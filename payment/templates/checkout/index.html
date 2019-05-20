@@ -1,0 +1,474 @@
+{% extends 'mainsite/layouts/private/master-frontend-test.html' %}
+{% load static %}
+{% load generic_filters %}
+
+{% block extraStyles %}
+    <style type="text/css">
+        .stepwizard-step p {
+            margin-top: 10px;
+        }
+
+        .stepwizard-row {
+            display: table-row;
+        }
+
+        .stepwizard {
+            display: table;
+            width: 75%;
+            position: relative;
+        }
+
+        .stepwizard-step button[disabled] {
+            opacity: 1 !important;
+            filter: alpha(opacity=100) !important;
+        }
+
+        .stepwizard-row:before {
+            top: 14px;
+            bottom: 0;
+            position: absolute;
+            content: " ";
+            width: 100%;
+            height: 1px;
+            background-color: #ccc;
+            z-order: 0;
+        }
+
+        .stepwizard-step {
+            display: table-cell;
+            text-align: center;
+            position: relative;
+        }
+
+        .btn-circle {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 12px;
+            line-height: 1.428571429;
+            border-radius: 15px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- begin::Body -->
+    <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+        <div class="m-grid__item m-grid__item--fluid m-wrapper">
+
+            <!-- BEGIN: Subheader -->
+            <div class="m-subheader ">
+                <div class="d-flex align-items-center">
+                    <div class="mr-auto">
+                        <h3 class="m-subheader__title ">Checkout</h3>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Subheader -->
+            <div class="m-content">
+                <!--begin: Search Form -->
+                <div class="m-form m-form--label-align-right m--margin-top-20 m--margin-bottom-30">
+                    <div class="container">
+
+                        {% if cart %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="stepwizard">
+                                        <div class="stepwizard-row setup-panel">
+                                            <div class="stepwizard-step">
+                                                <a href="#step-1" type="button" class="btn btn-primary btn-circle">1</a>
+                                                <p>Step 1</p>
+                                            </div>
+                                            <div class="stepwizard-step">
+                                                <a href="#step-2" type="button" class="btn btn-metal btn-circle"
+                                                   disabled>2</a>
+                                                <p>Step 2</p>
+                                            </div>
+                                            <div class="stepwizard-step">
+                                                <a href="#step-3" type="button" class="btn btn-metal btn-circle"
+                                                   disabled>3</a>
+                                                <p>Step 3</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <form method="post" action="{% url 'payment.process_checkout' %}"
+                                          autocomplete="off">
+
+                                        <div class="row setup-content" id="step-1">
+                                            <div class="col-md-12">
+
+                                                <div class="form-group m-form__group row">
+                                                    <div class="col-10 ml-auto">
+                                                        <h3 class="m-form__section">
+                                                            1. Billing Address
+                                                        </h3>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group m-form__group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">
+                                                        First name
+                                                    </label>
+                                                    <div class="col-7">
+                                                        <input class="form-control m-input" type="text"
+                                                               name="first_name" required
+                                                               value="{{ request.user.userbillingaddress.first_name|default:"" }}">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group m-form__group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">
+                                                        Last name
+                                                    </label>
+                                                    <div class="col-7">
+                                                        <input class="form-control m-input" type="text" name="last_name"
+                                                               required
+                                                               value="{{ request.user.userbillingaddress.last_name|default:"" }}">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group m-form__group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">
+                                                        Email
+                                                    </label>
+                                                    <div class="col-7">
+                                                        <input class="form-control m-input" type="email" name="email"
+                                                               required
+                                                               value="{{ request.user.userbillingaddress.email|default:request.user.email }}">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group m-form__group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">
+                                                        Address
+                                                    </label>
+                                                    <div class="col-7">
+                                                        <input class="form-control m-input" type="text"
+                                                               name="address_line_1" required
+                                                               value="{{ request.user.userbillingaddress.address_line_1|default:"" }}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group m-form__group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">
+                                                        City
+                                                    </label>
+                                                    <div class="col-7">
+                                                        <input class="form-control m-input" type="text" name="locality"
+                                                               required
+                                                               value="{{ request.user.userbillingaddress.city|default:"" }}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group m-form__group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">
+                                                        State or Region
+                                                    </label>
+                                                    <div class="col-7">
+                                                        <input class="form-control m-input" type="text"
+                                                               name="state_or_region" required
+                                                               value="{{ request.user.userbillingaddress.state|default:"" }}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group m-form__group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">
+                                                        Country
+                                                    </label>
+
+                                                    <div class="col-7">
+                                                        <select class="m-input form-control" name="country">
+                                                            <option></option>
+                                                            {% for country in countries %}
+                                                                <option
+                                                                        {% if country.id == request.user.userbillingaddress.country %}
+                                                                            selected
+                                                                        {% endif %}
+                                                                            value="{{ country.id }}">{{ country.name_ascii }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group m-form__group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">
+                                                        Postal Code
+                                                    </label>
+                                                    <div class="col-7">
+                                                        <input class="form-control m-input" type="text"
+                                                               name="postal_code" required
+                                                               value="{{ request.user.userprofile.postal_code }}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group m-form__group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">
+                                                    </label>
+                                                    <div class="col-md-7">
+                                                        <label>
+                                                            <input type="checkbox" name="not_remember_billing_address">
+                                                            <span></span>
+                                                            Do not remember this address
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group m-form__group row">
+                                                    <button class="btn btn-primary nextBtn btn-lg pull-right"
+                                                            type="button">Next
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row setup-content" id="step-2">
+                                            <div class="col-md-12">
+
+                                                <div class="form-group m-form__group row">
+                                                    <div class="col-10 ml-auto">
+                                                        <h3 class="m-form__section">
+                                                            2. Review Order
+                                                        </h3>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-8">
+                                                    <table class="table table-bordered">
+                                                        <thead>
+                                                        <tr>
+                                                            <th colspan="2" class="text-center">Order Summary</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {% for item in cart %}
+                                                            <tr>
+                                                                <td>{{ item.stock.symbol }} <br>
+                                                                    <small> {{ item.plan_duration }} month(s)</small>
+                                                                </td>
+                                                                <td>$ <span data-item-price>{{ item.price }}</span></td>
+                                                            </tr>
+                                                        {% endfor %}
+
+                                                        {% if cart %}
+                                                            <tr>
+                                                                <th>Total(USD)</th>
+                                                                <th>$ <span data-cart-total></span></th>
+                                                            </tr>
+                                                        {% endif %}
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <a class="btn m-btn btn-info"
+                                                                   href="{% url 'predictions:view_all_stocks_with_predictions' %}" style="color:white;">Add more stock to
+                                                                    cart</a>
+                                                            </th>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div class="form-group m-form__group row">
+                                                    <button class="btn btn-primary nextBtn btn-lg pull-right"
+                                                            type="button">Next
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row setup-content" id="step-3">
+                                            <div class="col-md-12">
+                                                <div class="form-group m-form__group row" data-paypal>
+                                                    <div class="col-10-md">
+                                                        <h3 class="m-form__section">
+                                                            3. Proceed to pay
+                                                        </h3>
+                                                    </div>
+                                                    <div style="height: 50px;"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="">
+                                                {% csrf_token %}
+                                                <p>Payments are safely processed with <a
+                                                        href='https://www.braintreepayments.com/' target='_blank'>Braintree</a>.
+                                                </p>
+                                                {% if braintree_error %}
+                                                    <div class="alert alert-danger fade in">
+                                                        <button class="close" data-dismiss="alert">&times;</button>
+                                                        {{ braintree_error|safe }}
+                                                    </div>
+                                                {% endif %}
+                                                <div class="braintree-notifications"></div>
+                                                <div id="braintree-dropin"></div>
+                                                <input class="btn btn-success btn-lg btn-block" type="submit"
+                                                       value="Pay now!"/>
+                                                <input type="hidden" name="total_price">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-md-4" style="display: none;">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th colspan="2" class="text-center">Checkout Summary</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for item in cart %}
+                                            <tr>
+                                                <td>{{ item.stock.symbol }} <br>
+                                                    <small> {{ item.plan_duration }} month(s)</small>
+                                                </td>
+                                                <td>$ <span data-item-price1>{{ item.price }}</span></td>
+                                            </tr>
+                                        {% endfor %}
+
+                                        {% if cart %}
+                                            <tr>
+                                                <th>Total(USD)</th>
+                                                <th>$ <span data-cart-total></span></th>
+                                            </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <th colspan="2">
+                                                <a class="btn m-btn btn-info" href="{% url 'stock.all' %}">Add more
+                                                    stock to cart</a>
+                                            </th>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4>No items in cart!</h4>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div><!-- //m-content -->
+
+        </div><!-- //m-portlet__body -->
+
+    </div>
+{% endblock %}
+
+
+{% block extraScripts %}
+    <script type="text/javascript">
+        var CSRF_TOKEN = "{{csrf_token}}";
+        var URL_GET_BRAINTREE_CLIENT_TOKEN = "{% url 'payment.generate_client_token' %}";
+        var totalPrice = 0;
+    </script>
+    <script src="https://js.braintreegateway.com/v2/braintree.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            /**
+             * Updating cart total
+             */
+            var totalPrice = 0;
+            jQuery("[data-item-price1]").each(function (key, val) {
+                totalPrice += parseFloat($(val).html());
+            })
+            jQuery("[data-cart-total]").html(totalPrice.toFixed(2));
+            jQuery('input[name="total_price"]').val(totalPrice.toFixed(2));
+            /**
+             * Cart total update
+             */
+
+            var navListItems = $('div.setup-panel div a'),
+                allWells = $('.setup-content'),
+                allNextBtn = $('.nextBtn');
+
+            allWells.hide();
+            allWells.eq(0).show();
+
+            navListItems.click(function (e) {
+                e.preventDefault();
+
+                var $target = $($(this).attr('href')),
+                    $item = $(this);
+
+                if ($item.attr('disabled') == 'disabled')
+                    return;
+
+                if (!$item.hasClass('disabled')) {
+                    navListItems.removeClass('btn-primary').addClass('btn-metal');
+                    $item.removeClass('btn-metal').addClass('btn-primary');
+                    allWells.hide();
+                    $target.show();
+                    $target.find('input:eq(0)').focus();
+                }
+            });
+
+            allNextBtn.click(function (e) {
+                e.preventDefault();
+                var clickedParent = $(this).parents('.setup-content');
+                if ($(clickedParent).attr('id') == 'step-1') {
+                    AjaxCall(URL_GET_BRAINTREE_CLIENT_TOKEN, "post", {'price': totalPrice}, successPopulatePaymentForm, errorPopulatePaymentForm, {'$this': $(this)});
+                } else {
+                    proceedNext($(this));
+                }
+            });
+
+        });
+
+        function proceedNext($this) {
+            var curStep = $($this).closest(".setup-content"),
+                curStepBtn = curStep.attr("id"),
+                nextStepWizard = $('div.setup-panel div a[href="#' + curStepBtn + '"]').parent().next().children("a"),
+                curInputs = curStep.find("input, select"),
+                isValid = true;
+
+            $(".form-group").removeClass("has-error");
+            for (var i = 0; i < curInputs.length; i++) {
+                // Reset prev border colors
+                $(curInputs[i]).css("border-color", "#ebedf2");
+
+                if (curInputs[i].value.length == 0) {
+                    isValid = false;
+                    $(curInputs[i]).css("border-color", "red");
+                }
+                if ($(curInputs[i]).is('select')) {
+                    if ($(curInputs[i]).find('option:selected').length == 0) {
+                        isValid = false;
+                        $(curInputs[i]).css("border-color", "red");
+                    }
+                }
+            }
+
+            if (isValid)
+                nextStepWizard.removeAttr('disabled').trigger('click');
+        }
+
+        function successPopulatePaymentForm(data, extraData) {
+            console.log('success', data, extraData);
+            $("#checkout").find('input[name="amount"]').val(totalPrice);
+            $("#checkout").find('input#client_token').val(data.client_token);
+
+            var clientToken = data.client_token;
+            // creating payment method nonse
+
+            // Here you tell Braintree to add the drop-in to your division above
+            braintree.setup(data.client_token, "dropin", {
+                container: "braintree-dropin"
+                , onError: function (obj) {
+                    // Errors will be added to the html code
+                    $('[type=submit]').prop('disabled', false);
+                    $('.braintree-notifications').html('<p class="alert alert-danger">' + obj.message + '</p>');
+                }
+            });
+            /*braintree.setup(clientToken, "custom", {
+             container: "payment-form"
+             });*/
+
+            proceedNext(extraData.$this);
+        }
+
+        function errorPopulatePaymentForm(data, extraData) {
+            console.log('error', data, extraData);
+            proceedNext(extraData.$this);
+        }
+
+    </script>
+{% endblock %}

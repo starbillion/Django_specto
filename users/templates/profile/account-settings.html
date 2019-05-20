@@ -1,0 +1,425 @@
+{% extends 'mainsite/layouts/private/master-frontend-test.html' %}
+{% load static %}
+{% load generic_filters %}
+{% block extraStyles %}
+    <style type="text/css">
+        @media (min-width: 993px) {
+            .m-header--fixed .m-body {
+                padding-top: 100px !important;
+            }
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <!--begin::Modal-->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        Add Restricted IPs/Device
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">
+						&times;
+					</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <form class="m-form m-form--fit" method="post" action="{% url 'add-restricted-ip-device' %}">
+                        <div class="m-portlet__body">
+                            <div class="m-form__section m-form__section--first">
+
+                                {% csrf_token %}
+                                <div class="form-group m-form__group">
+                                    <label for="example_input_full_name">
+                                        IP/Device
+                                    </label>
+                                    <input type="text" name="ip_device" class="form-control m-input"
+                                           placeholder="IP or Device">
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">
+                        Save
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--end::Modal-->
+    <!--begin::Modal-->
+    <div class="modal fade" id="myEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        Edit Restricted IPs/Device
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">
+						&times;
+					</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <form class="m-form m-form--fit" method="post" action="{% url 'edit-restricted-ip-device' %}">
+                        <div class="m-portlet__body">
+                            <div class="m-form__section m-form__section--first">
+
+                                {% csrf_token %}
+                                <div class="form-group m-form__group">
+                                    <label for="example_input_full_name">
+                                        IP/Device
+                                    </label>
+                                    <input type="text" name="ip_device" class="form-control m-input"
+                                           placeholder="IP or Device">
+                                </div>
+                                <input type="hidden" name="id">
+                            </div>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">
+                        Save
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--end::Modal-->
+    <!-- begin::Body -->
+    <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+        <!-- BEGIN: Left Aside -->
+        <button class="m-aside-left-close  m-aside-left-close--skin-dark " id="m_aside_left_close_btn">
+            <i class="la la-close"></i>
+        </button>
+
+        <!-- END: Left Aside -->
+        <div class="m-grid__item m-grid__item--fluid m-wrapper">
+            <!-- BEGIN: Subheader -->
+            <div class="m-subheader ">
+                <div class="d-flex align-items-center">
+                    <div class="mr-auto">
+                        <h3 class="m-subheader__title ">
+                            Account Settings
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Subheader -->
+            <div class="m-content">
+
+                <div class="row">
+                    <div class="col-xl-3 col-lg-4">
+                        {% include 'blocks/left-sidebar-profile.html' %}
+                    </div>
+                    <div class="col-xl-9 col-lg-8">
+                        <div class="m-portlet m-portlet--full-height m-portlet--tabs  ">
+                            <div class="m-portlet__head">
+                                <div class="m-portlet__head-tools">
+                                    <ul class="nav nav-tabs m-tabs m-tabs-line   m-tabs-line--left m-tabs-line--primary"
+                                        role="tablist">
+                                        <li class="nav-item m-tabs__item">
+                                            <a class="nav-link m-tabs__link active" data-toggle="tab"
+                                               href="#m_user_profile_tab_1" role="tab">
+                                                <i class="flaticon-share m--hide"></i>
+                                                Login Activity
+                                            </a>
+                                        </li>
+                                        <li class="nav-item m-tabs__item">
+                                            <a class="nav-link m-tabs__link" data-toggle="tab"
+                                               href="#m_user_profile_tab_2" role="tab">
+                                                Restricted IPs/Devices
+                                            </a>
+                                        </li>
+                                        <!-- <li class="nav-item m-tabs__item">
+                                            <a class="nav-link m-tabs__link" data-toggle="tab" href="#m_user_profile_tab_3" role="tab">
+                                                Settings
+                                            </a>
+                                        </li> -->
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="m-portlet__body">
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="m_user_profile_tab_1">
+
+                                        <!--begin::Widget 11-->
+                                        <div class="m-widget11">
+                                            <div class="table-responsive">
+                                                <!--begin::Table-->
+                                                <table class="table">
+                                                    <!--begin::Thead-->
+                                                    <thead>
+                                                    <tr>
+                                                        <!-- <td class="m-widget11__label">
+                                                            #
+                                                        </td> -->
+                                                        <td class="m-widget11__app">
+                                                            IP
+                                                        </td>
+                                                        <td class="m-widget11__sales">
+                                                            Browser Details
+                                                        </td>
+                                                        <td class="m-widget11__change">
+                                                            Time
+                                                        </td>
+                                                        <td class="m-widget11__price">
+                                                            Login Status
+                                                        </td>
+                                                    </tr>
+                                                    </thead>
+                                                    <!--end::Thead-->
+                                                    <!--begin::Tbody-->
+                                                    <tbody>
+
+                                                    {% for login_log in login_logs %}
+                                                        <tr>
+                                                            <!-- <td>
+                                                                <label class="m-checkbox m-checkbox--solid m-checkbox--single m-checkbox--brand">
+                                                                    <input type="checkbox">
+                                                                    <span></span>
+                                                                </label>
+                                                            </td> -->
+                                                            <td>
+																<span class="m-widget11__title">
+																	{{ login_log.ip|default:'N.A' }}
+																</span>
+                                                                <span class="m-widget11__sub">
+																	Logged in from IP
+																</span>
+                                                            </td>
+                                                            <td>
+                                                                {% for key,val in login_log.user_agent.items %}
+                                                                    <small>{{ key|title }}: {{ val }}</small><br>
+                                                                {% endfor %}
+                                                            </td>
+                                                            <td>
+                                                                {{ login_log.created_at }}
+                                                            </td>
+                                                            <td class="m--align-right m--font-brand">
+                                                                {{ login_log.status | change_yes_no }}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+
+                                                    </tbody>
+                                                    <!--end::Tbody-->
+                                                </table>
+                                                <!--end::Table-->
+                                            </div>
+
+                                        </div>
+                                        <!--end::Widget 11-->
+
+                                    </div>
+                                    <div class="tab-pane" id="m_user_profile_tab_2">
+                                        <div class="m-portlet__body">
+                                            <!--begin: Search Form -->
+
+                                            <div class="m-form m-form--label-align-right m--margin-top-20 m--margin-bottom-30">
+                                                <div class="row align-items-center">
+                                                    <div class="col-xl-12 order-1 order-xl-2 m--align-right">
+                                                        <a href="#"
+                                                           class="btn btn-accent m-btn m-btn--custom m-btn--icon m-btn--air m-btn--pill"
+                                                           id="addNewModal">
+                                                            <span>
+                                                                <i class="la la-pencil-square-o"></i>
+                                                                <span>
+                                                                    Add New
+                                                                </span>
+                                                            </span>
+                                                        </a>
+                                                        <div class="m-separator m-separator--dashed d-xl-none"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!--end: Search Form -->
+                                            <!--begin: Datatable -->
+                                            <div class="m_datatable" id="subs-data"
+                                                 data-raw-data="{{ restricted_ips }}"></div>
+                                            <!--end: Datatable -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    {% include "modals/profile/image-upload.html" %}
+    <!-- //Modal -->
+
+    <!-- end:: Body -->
+{% endblock %}
+
+{% block extraScripts %}
+    <script src="{% static 'js/cropper.min.js' %}"></script>
+    <script src="{% static 'vendor/jquery-file-upload/js/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'vendor/jquery-file-upload/js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'vendor/jquery-file-upload/js/jquery.fileupload.js' %}"></script>
+
+    <script src="{% static 'js/avatar-upload.js' %}"></script>
+
+    <script type="text/javascript">
+        $('#openModal').on('click', function () {
+            $('#bootstrap-modal').modal({
+                keyboard: false
+            })
+        })
+
+        // Allow only numbers in input field
+        function isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+    <!-- <script src="//maps.google.com/maps/api/js"></script> -->
+    <script>
+        jQuery("#addNewModal").on("click", function (e) {
+            var $targetModal = jQuery('#myModal');
+
+            var $modalForm = jQuery($targetModal).find('div.modal-body form');
+            jQuery($modalForm).find("input[name='ip_device']").val('');
+            jQuery($targetModal).modal({
+                backdrop: false
+            });
+        });
+        // Add action listener to edit details modal
+        jQuery("body").on("click", "a[data-edit-modal]", function (e) {
+
+            var $targetModal = jQuery('#myEditModal');
+            var $rawDataElem = $(this).parents('tr').find('[data-raw-json]');
+            var $modalForm = jQuery($targetModal).find('div.modal-body form');
+
+            jQuery($modalForm).find("input[name='id']").val(jQuery($rawDataElem).data('id'));
+            jQuery($modalForm).find("input[name='ip_device']").val(jQuery($rawDataElem).data('ip_device'));
+            jQuery($targetModal).modal({
+                backdrop: false
+            });
+        });
+        // Add action listener to delete
+        jQuery("body").on("click", "a[data-remove-ip-device]", function (e) {
+
+            if (!confirm("Are you sure to remove this record?"))
+                return;
+
+            var $rawDataElem = $(this).parents('tr').find('[data-raw-json]');
+
+            var URL_REMOVE_RESTRICTED_IP_DEVICE = "{% url 'remove-restricted-ip-device' %}";
+            window.location.href = URL_REMOVE_RESTRICTED_IP_DEVICE + "?id=" + jQuery($rawDataElem).data('id');
+
+        });
+        var stocksJson = [];
+        var DatatableDataLocalDemo = function () {
+            var e = function () {
+                // var e = JSON.parse(srcJson);
+                var data = stocksJson;
+                console.log("++++", a);
+                var a = $(".m_datatable").mDatatable({
+                    data: {
+                        type: "local", source: data, pageSize: 10
+                    }
+                    , layout: {
+                        theme: "default", class: "", scroll: !1, height: 450, footer: !1
+                    }
+                    , columns: [
+                        {
+                            field: "id",
+                            title: "#",
+                            width: 50,
+                            {#sortable: !1,#}
+                            {#selector: !1,#}
+                            textAlign: "center",
+                        }
+                        , {
+                            field: "ip_device", title: "Restricted IPs/Device", width: 200
+                        }
+                        , {
+                            field: "who_did", title: "Blocked by", template: function (data) {
+                                var a = {
+                                    "user": {
+                                        title: "User", class: " m-badge--danger"
+                                    }
+                                    , "admin": {
+                                        title: "Admin", class: " m-badge--danger"
+                                    }
+                                };
+                                return '<span data-raw-json data-id="' + data.pk + '" data-ip_device="' + data.ip_device + '" class="m-badge ' + a[data.who_did].class + ' m-badge--wide">' + a[data.who_did].title + "</span>"
+
+                            }
+                        }
+                        , {
+                            field: "Actions",
+                            width: 110,
+                            title: "Actions",
+                            sortable: !1,
+                            overflow: "visible",
+                            template: function (data) {
+                                if (data.who_did == "user") {
+                                    return '<a class="dropdown-item" href="#" data-remove-ip-device><i class="la la-remove"></i> Remove</a>';
+                                }
+                                else {
+                                    return '<a class="dropdown-item" href="#" style="pointer-events: none; cursor: default; opacity:0.5;" title="Not able to remove"><i class="la la-remove"></i> Remove</a>';
+                                }
+
+                            }
+                        }
+                    ]
+                })
+            };
+
+            return {
+                init: function () {
+                    //if (stocksJson.length == 0) {
+                    stocksJson = jQuery('#subs-data').data('raw-data');
+                    console.log("stock json", stocksJson);
+                    e()
+                    //}
+                },
+                refresh: function () {
+                    console.log("stock json", stocksJson);
+                    e()
+                },
+
+            }
+        }
+        ();
+
+        function loadJson() {
+            DatatableDataLocalDemo.init();
+        }
+
+        jQuery(document).ready(function () {
+            loadJson();
+        });
+
+    </script>
+{% endblock %}

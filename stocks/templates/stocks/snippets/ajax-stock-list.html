@@ -1,0 +1,79 @@
+{% load static %}
+{% load generic_filters %}
+
+{% for stock in stocks %}
+
+	{% check_if_subscribed_stock_hidden_by_user stock.id as subs_stock_hidden_by_user %}
+	{% if not subs_stock_hidden_by_user %}
+
+		<div class="col-md-12 col-lg-6 col-xl-4 stock-widget-wrap" data-style="border-bottom: solid 2px rgba(242,242,242,0.85); padding: 10px 5px;">
+			<!--begin::Total Profit-->
+			<div class="m-widget24">
+				<div class="m-widget24__item" data-predictions="{{stock.stockprediction_set.select_related.all|to_json}}" data-id="{{stock.pk}}">
+					<h4 class="m-widget24__title">
+						{{stock.symbol}} 
+					</h4>
+					
+					<br>
+					<span class="m-widget24__desc">
+						{{stock.name}}
+					</span>
+					<span class="m-widget24__stats m--font-brand" data-accuracy-prev_day></span>
+
+					<div class="m--space-10"></div>
+					<div class="progress m-progress--sm">
+						<div class="progress-bar m--bg-brand" role="progressbar" style="width: 78%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+					</div>
+
+					<span class="m-widget24__change">
+						High <p data-high>97</p>
+					</span>
+					<span class="m-widget24__change">
+						Low <p data-low>78</p>
+					</span>
+					<span class="m-widget24__change">
+						Close <p data-close>83</p>
+					</span>
+
+					<div style="clear: both;"></div>
+					{% get_stock_subscription_status stock.id as subscription_status %}
+					{% get_stock_fav_status stock.id as fav_status %}
+					{% check_if_stock_in_cart stock.id as stock_in_cart %}
+					<span class="m-widget24__desc">
+						{% if fav_status %}
+							<button href="#" data-fav-trigger data-fav-status="1" class="btn  btn-info m-btn btn-sm" data-id="{{stock.id}}"><i class="la la-heart"></i></button>
+						{% else %}
+							<button href="#" data-fav-trigger data-fav-status="0" class="btn  btn-default m-btn btn-sm" data-id="{{stock.id}}"><i class="la la-heart"></i></button>
+						{% endif %}
+						{% if subscription_status %}
+							<a class="m-btn  btn btn-success btn-sm" data-hide-trigger data-id="{{stock.id}}" href="#" role="button">
+								Hide
+							</a>
+						{% else %}
+							{% if stock_in_cart %}
+								<a class="m-btn  btn btn-danger btn-sm" data-subscribe="0" data-id="{{stock.id}}" href="{% url 'payment.cart' %}" role="button">Go to cart</a>
+							{% else %}
+								<a class="m-btn  btn btn-danger btn-sm" data-add-to-cart-modal data-already-in-cart="0" data-subscribe="0" data-id="{{stock.id}}" href="#" role="button">Subscribe</a>
+							{% endif %}
+						{% endif %}
+						<a class="m-btn  btn btn-info btn-sm" href="{% url 'stock.single' stock.symbol %}" role="button">View
+						</a>
+
+					</span>
+					<div style="clear: both"></div>
+					<span class="m-widget24__change no-left-margin">
+						<div class='input-group date' id='m_datepicker_2' style="display: inline-flex; max-width:180px; margin-top: 10px;">
+							<input type='text' class="form-control m-input datepicker-trigger" readonly  placeholder="Select date"/>
+							<span class="input-group-addon">
+								<i class="la la-calendar-check-o"></i>
+							</span>
+						</div>
+					</span>
+
+				</div>
+			</div>
+			<!--end::Total Profit-->
+		</div>
+
+	{% endif %}
+{% endfor %}

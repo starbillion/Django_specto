@@ -1,0 +1,13 @@
+specs/
+venv/
+env/
+__pycache__/
+*-doc
+
+.pyc
+
+# pycharm
+.idea
+.idea/*
+.idea/
+/.idea/

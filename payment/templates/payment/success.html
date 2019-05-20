@@ -1,0 +1,147 @@
+{% extends 'mainsite/layouts/private/master-frontend-test.html' %}
+{% load static %}
+{% load generic_filters %}
+
+{% block extraStyles %}
+    <style type="text/css">
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- begin::Body -->
+    <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+        <div class="m-grid__item m-grid__item--fluid m-wrapper">
+
+            <!-- BEGIN: Subheader -->
+            <div class="m-subheader ">
+                <div class="d-flex align-items-center">
+                    <div class="mr-auto">
+                        <h5 class="m-subheader__title ">
+                            The requested transaction with transaction id
+                            <small>{{ transaction_id }}</small>
+                            was successful!
+                        </h5>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Subheader -->
+
+            <div class="m-content">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <!--begin:: Widgets/Sale Reports-->
+                        <div class="m-portlet m-portlet--full-height ">
+                            <div class="m-portlet__head">
+                                <div class="m-portlet__head-caption">
+                                    <div class="m-portlet__head-title">
+                                        <h3 class="m-portlet__head-text">
+                                            Summary &nbsp;<button class="m-btn btn btn-info btn-sm" data-trigger="print"
+                                                                  style="color:white;">Print
+                                        </button>
+                                        </h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m-portlet__body">
+                                <!--Begin::Tab Content-->
+                                <div class="tab-content">
+                                    <!--begin::tab 1 content-->
+                                    <div class="tab-pane active" id="m_widget11_tab1_content">
+                                        <!--begin::Widget 11-->
+                                        <div class="m-widget11">
+                                            <div class="table-responsive printHtml">
+                                                <!--begin::Table-->
+                                                <table class="table">
+                                                    <!--begin::Thead-->
+                                                    <thead>
+                                                    <tr>
+                                                        <td class="m-widget11__label" style="">
+                                                            #
+                                                        </td>
+                                                        <td class="m-widget11__app">
+                                                            Stock
+                                                        </td>
+                                                        <td class="m-widget11__sales">
+                                                            Duration
+                                                        </td>
+                                                        <td class="m-widget11__price" style="width: 15%;">
+                                                            From - To
+                                                        </td>
+                                                        <td class="m-widget11__total m--align-right">
+                                                            Amount Paid
+                                                        </td>
+                                                    </tr>
+                                                    </thead>
+                                                    <!--end::Thead-->
+                                                    <!--begin::Tbody-->
+                                                    <tbody>
+                                                    {% for subs in subscribed %}
+                                                        {% get_stock_obj_by_subscription subs.stock_id as subscribed_stock %}
+                                                        <tr>
+                                                            <td>
+                                                                <span>{{ forloop.counter }}</span>
+                                                            </td>
+                                                            <td>
+																	<span class="m-widget11__title">
+																		{{ subscribed_stock.name }}
+																	</span>
+                                                                <span class="m-widget11__sub">
+																		{{ subscribed_stock.symbol }}
+																	</span>
+                                                            </td>
+                                                            <td>
+                                                                {{ subs.purchased_months }} month(s)
+                                                            </td>
+                                                            <td>
+                                                                {{ subs.subscription_started }}
+                                                                - {{ subs.subscription_ends }}
+                                                            </td>
+                                                            <td class="m--align-right m--font-brand">
+                                                                ${{ subs.total_price }}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                    <tfoot>
+                                                    <th>
+                                                    <td colspan="5">Transaction id: {{ transaction_id }}</td>
+                                                    </th>
+                                                    </tfoot>
+                                                    <!--end::Tbody-->
+                                                </table>
+                                                <!--end::Table-->
+                                            </div>
+                                        </div>
+                                        <!--end::Widget 11-->
+                                    </div>
+                                    <!--end::tab 1 content-->
+                                </div>
+                                <!--End::Tab Content-->
+                            </div>
+                        </div>
+                        <!--end:: Widgets/Sale Reports-->
+                    </div>
+                </div>
+            </div><!-- //m-content -->
+
+        </div><!-- //m-wrapper -->
+    </div>
+{% endblock %}
+
+
+{% block extraScripts %}
+    <script type="text/javascript">
+        jQuery("[data-trigger]").on("click", function () {
+            printData();
+        })
+
+        function printData() {
+            var htmlToPrint = $(".printHtml").html();
+            newWin = window.open("");
+            newWin.document.write(htmlToPrint);
+            newWin.print();
+            newWin.close();
+        }
+
+    </script>
+{% endblock %}

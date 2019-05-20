@@ -1,0 +1,1127 @@
+{% extends 'admin/layouts/master.html' %}
+
+{% load static %}
+
+{% block extraStyles %}
+    <style type="text/css">
+        #csvUploadDropzone {
+            margin-top: 10px;
+            min-height: 220px
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+        <!-- BEGIN: Left Aside -->
+        <button class="m-aside-left-close m-aside-left-close--skin-dark" id="m_aside_left_close_btn">
+            <i class="la la-close"></i>
+        </button>
+        <div id="m_aside_left" class="m-grid__item	m-aside-left  m-aside-left--skin-dark ">
+            <!-- BEGIN: Aside Menu -->
+            <div id="m_ver_menu"
+                 class="m-aside-menu  m-aside-menu--skin-dark m-aside-menu--submenu-skin-dark m-aside-menu--dropdown "
+                 data-menu-vertical="true" data-menu-dropdown="true" data-menu-scrollable="true"
+                 data-menu-dropdown-timeout="500">
+                <ul class="m-menu__nav  m-menu__nav--dropdown-submenu-arrow ">
+                    <li class="m-menu__item  {% if request.resolver_match.url_name == 'admin.manage-subscriptions-of-users' %}m-menu__item--active{% endif %}" aria-haspopup="true">
+                        <a href="{% url 'admin.manage-subscriptions-of-users' %}" class="m-menu__link ">
+                            <span class="m-menu__item-here"></span>
+                            <i class="m-menu__link-icon flaticon-line-graph"></i>
+                            <span class="m-menu__link-text">
+                                Manage Subscriptions of Users
+                            </span>
+                        </a>
+                    </li>
+                    <li class="m-menu__item  {% if request.resolver_match.url_name == 'admin.manage-restricted-ips-device-of-users' %}m-menu__item--active{% endif %}" aria-haspopup="true">
+                        <a href="{% url 'admin.manage-restricted-ips-device-of-users' %}" class="m-menu__link ">
+                            <span class="m-menu__item-here"></span>
+                            <i class="m-menu__link-icon flaticon-line-graph"></i>
+                            <span class="m-menu__link-text">
+                                Manage Restricted IPs/Device of Users
+                            </span>
+                        </a>
+                    </li>
+                    {#				<li class="m-menu__item  m-menu__item--active" aria-haspopup="true" >#}
+                    {#					<a href="{% url 'admin.index' %}" class="m-menu__link ">#}
+                    {#						<span class="m-menu__item-here"></span>#}
+                    {#						<i class="m-menu__link-icon flaticon-line-graph"></i>#}
+                    {#						<span class="m-menu__link-text">#}
+                    {#							Dashboard#}
+                    {#						</span>#}
+                    {#					</a>#}
+                    {#				</li>#}
+                    {#				<li class="m-menu__item  m-menu__item--active" aria-haspopup="true" >#}
+                    {#					<a href="{% url 'admin.manage-subscriptions' %}" class="m-menu__link ">#}
+                    {#						<span class="m-menu__item-here"></span>#}
+                    {#						<i class="m-menu__link-icon flaticon-line-graph"></i>#}
+                    {#						<span class="m-menu__link-text">#}
+                    {#							Manage Subscriptions#}
+                    {#						</span>#}
+                    {#					</a>#}
+                    {#				</li>#}
+                    <!--<li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true"  data-menu-submenu-toggle="hover">
+                        <a  href="#" class="m-menu__link m-menu__toggle">
+                            <span class="m-menu__item-here"></span>
+                            <i class="m-menu__link-icon flaticon-open-box"></i>
+                            <span class="m-menu__link-text">
+                                Layouts
+                            </span>
+                            <i class="m-menu__ver-arrow la la-angle-right"></i>
+                        </a>
+                        <div class="m-menu__submenu">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item  m-menu__item--parent" aria-haspopup="true" >
+                                    <a  href="#" class="m-menu__link ">
+                                        <span class="m-menu__item-here"></span>
+                                        <span class="m-menu__link-text">
+                                            Layouts
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true" >
+                                    <a  href="builder.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Layout Builder
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="builder.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Boxed Layout
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="builder.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Right Sidebar
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="builder.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Fixed Footer
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                     <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true"  data-menu-submenu-toggle="hover">
+                        <a  href="#" class="m-menu__link m-menu__toggle">
+                            <span class="m-menu__item-here"></span>
+                            <i class="m-menu__link-icon flaticon-layers"></i>
+                            <span class="m-menu__link-title">
+                                <span class="m-menu__link-wrap">
+                                    <span class="m-menu__link-text">
+                                        Reports
+                                    </span>
+                                    <span class="m-menu__link-badge">
+                                        <span class="m-badge m-badge--danger">
+                                            2
+                                        </span>
+                                    </span>
+                                </span>
+                            </span>
+                            <i class="m-menu__ver-arrow la la-angle-right"></i>
+                        </a>
+                        <div class="m-menu__submenu">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item  m-menu__item--parent" aria-haspopup="true" >
+                                    <a  href="#" class="m-menu__link ">
+                                        <span class="m-menu__item-here"></span>
+                                        <span class="m-menu__link-title">
+                                            <span class="m-menu__link-wrap">
+                                                <span class="m-menu__link-text">
+                                                    Reports
+                                                </span>
+                                                <span class="m-menu__link-badge">
+                                                    <span class="m-badge m-badge--danger">
+                                                        2
+                                                    </span>
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true" >
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-icon flaticon-pie-chart"></i>
+                                        <span class="m-menu__link-text">
+                                            Finance Reports
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-icon flaticon-line-graph"></i>
+                                        <span class="m-menu__link-text">
+                                            Accouning Audit
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-icon flaticon-statistics"></i>
+                                        <span class="m-menu__link-text">
+                                            Investments
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-icon flaticon-coins"></i>
+                                        <span class="m-menu__link-text">
+                                            Sales
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true"  data-menu-submenu-toggle="hover" data-redirect="true">
+                        <a  href="#" class="m-menu__link m-menu__toggle">
+                            <span class="m-menu__item-here"></span>
+                            <i class="m-menu__link-icon flaticon-lifebuoy"></i>
+                            <span class="m-menu__link-text">
+                                Support
+                            </span>
+                            <i class="m-menu__ver-arrow la la-angle-right"></i>
+                        </a>
+                        <div class="m-menu__submenu">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item  m-menu__item--parent" aria-haspopup="true"  data-redirect="true">
+                                    <a  href="#" class="m-menu__link ">
+                                        <span class="m-menu__item-here"></span>
+                                        <span class="m-menu__link-text">
+                                            Support
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Reports
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true"  data-menu-submenu-toggle="hover" data-redirect="true">
+                                    <a  href="#" class="m-menu__link m-menu__toggle">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Cases
+                                        </span>
+                                        <i class="m-menu__ver-arrow la la-angle-right"></i>
+                                    </a>
+                                    <div class="m-menu__submenu">
+                                        <span class="m-menu__arrow"></span>
+                                        <ul class="m-menu__subnav">
+                                            <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                                <a  href="inner.html" class="m-menu__link ">
+                                                    <i class="m-menu__link-icon flaticon-computer"></i>
+                                                    <span class="m-menu__link-title">
+                                                        <span class="m-menu__link-wrap">
+                                                            <span class="m-menu__link-text">
+                                                                Pending
+                                                            </span>
+                                                            <span class="m-menu__link-badge">
+                                                                <span class="m-badge m-badge--warning m-badge--wide">
+                                                                    10
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                            <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                                <a  href="inner.html" class="m-menu__link ">
+                                                    <i class="m-menu__link-icon flaticon-signs-2"></i>
+                                                    <span class="m-menu__link-title">
+                                                        <span class="m-menu__link-wrap">
+                                                            <span class="m-menu__link-text">
+                                                                Urgent
+                                                            </span>
+                                                            <span class="m-menu__link-badge">
+                                                                <span class="m-badge m-badge--danger m-badge--wide">
+                                                                    6
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                            <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                                <a  href="inner.html" class="m-menu__link ">
+                                                    <i class="m-menu__link-icon flaticon-clipboard"></i>
+                                                    <span class="m-menu__link-title">
+                                                        <span class="m-menu__link-wrap">
+                                                            <span class="m-menu__link-text">
+                                                                Done
+                                                            </span>
+                                                            <span class="m-menu__link-badge">
+                                                                <span class="m-badge m-badge--success m-badge--wide">
+                                                                    2
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                            <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                                <a  href="inner.html" class="m-menu__link ">
+                                                    <i class="m-menu__link-icon flaticon-multimedia-2"></i>
+                                                    <span class="m-menu__link-title">
+                                                        <span class="m-menu__link-wrap">
+                                                            <span class="m-menu__link-text">
+                                                                Archive
+                                                            </span>
+                                                            <span class="m-menu__link-badge">
+                                                                <span class="m-badge m-badge--info m-badge--wide">
+                                                                    245
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Clients
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Audit
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true"  data-menu-submenu-toggle="hover" data-redirect="true">
+                        <a  href="#" class="m-menu__link m-menu__toggle">
+                            <span class="m-menu__item-here"></span>
+                            <i class="m-menu__link-icon flaticon-share"></i>
+                            <span class="m-menu__link-text">
+                                Feedbacks
+                            </span>
+                            <i class="m-menu__ver-arrow la la-angle-right"></i>
+                        </a>
+                        <div class="m-menu__submenu">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-title">
+                                            <span class="m-menu__link-wrap">
+                                                <span class="m-menu__link-text">
+                                                    Product Feedbacks
+                                                </span>
+                                                <span class="m-menu__link-badge">
+                                                    <span class="m-badge m-badge--accent">
+                                                        3
+                                                    </span>
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Customer Reviews
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Product Ratings
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Customer Support
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true"  data-menu-submenu-toggle="hover" data-redirect="true">
+                        <a  href="#" class="m-menu__link m-menu__toggle">
+                            <span class="m-menu__item-here"></span>
+                            <i class="m-menu__link-icon flaticon-network"></i>
+                            <span class="m-menu__link-text">
+                                Conversions
+                            </span>
+                            <i class="m-menu__ver-arrow la la-angle-right"></i>
+                        </a>
+                        <div class="m-menu__submenu">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item  m-menu__item--parent" aria-haspopup="true"  data-redirect="true">
+                                    <a  href="#" class="m-menu__link ">
+                                        <span class="m-menu__item-here"></span>
+                                        <span class="m-menu__link-text">
+                                            Conversions
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--line">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Goals
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--line">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-title">
+                                            <span class="m-menu__link-wrap">
+                                                <span class="m-menu__link-text">
+                                                    Ecommerce
+                                                </span>
+                                                <span class="m-menu__link-badge">
+                                                    <span class="m-badge m-badge--warning m-badge--wide m-badge--rounded">
+                                                        new
+                                                    </span>
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--line">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Transactions
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="m-menu__item " aria-haspopup="true"  data-redirect="true">
+                                    <a  href="inner.html" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--line">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">
+                                            Funnels
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li> -->
+                </ul>
+            </div>
+            <!-- END: Aside Menu -->
+        </div>
+        <!-- END: Left Aside -->
+
+        <div class="m-grid__item m-grid__item--fluid m-wrapper">
+            <div class="m-content">
+
+                <!-- <div class="m-alert m-alert--icon m-alert--air m-alert--square alert alert-dismissible m--margin-bottom-30" role="alert">
+                    <div class="m-alert__icon">
+                        <i class="flaticon-exclamation m--font-brand"></i>
+                    </div>
+                    <div class="m-alert__text">
+                        The Metronic Datatable component supports local or remote data binding. For the local data binding you can pass javascript array as data source. In this example the grid fetches its data from a javascript array data source. It also defines the schema model of the data source. In addition to the visualization, the Datatable provides built-in support for operations over data such as sorting, filtering and paging performed in user browser(frontend).
+                    </div>
+                </div> -->
+
+                <div class="m-portlet m-portlet--mobile">
+                    <div class="m-portlet__head">
+                        <div class="m-portlet__head-caption">
+                            <div class="m-portlet__head-title">
+                                <h3 class="m-portlet__head-text">
+                                    Predictions available
+                                    <small>
+                                        for {{ stock.symbol }}
+                                    </small>
+                                </h3>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="m-portlet__body">
+                        <!--begin: Search Form -->
+                        <input type="hidden" data-raw-json data-id="{{ stock.id }}">
+                        <div class="m-form m-form--label-align-right m--margin-top-20 m--margin-bottom-30">
+                            <div class="row align-items-center">
+                                <div class="col-xl-3 order-2 order-xl-1">
+                                    <div class="form-group m-form__group row align-items-center">
+                                        <div class="col-md-12">
+                                            <div class="m-input-icon m-input-icon--left">
+                                                <input type="text" class="form-control m-input m-input--solid"
+                                                       placeholder="Search..." id="generalSearch">
+                                                <span class="m-input-icon__icon m-input-icon__icon--left">
+												<span>
+													<i class="la la-search"></i>
+												</span>
+											</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-9 order-1 order-xl-2 m--align-right">
+                                    <a href="#" data-manage-subscriptions-modal
+                                       class="btn btn-accent m-btn m-btn--custom m-btn--icon m-btn--air m-btn--pill">
+									<span>
+										<i class="la la-pencil-square-o"></i>
+										<span>
+											Manage Subscription
+										</span>
+									</span>
+                                    </a>
+                                    <a href="#"
+                                       class="btn btn-accent m-btn m-btn--custom m-btn--icon m-btn--air m-btn--pill"
+                                       id="addNewModal">
+									<span>
+										<i class="la la-pencil-square-o"></i>
+										<span>
+											Add New
+										</span>
+									</span>
+                                    </a>
+
+                                    <a href="#"
+                                       class="btn btn-accent m-btn m-btn--custom m-btn--icon m-btn--air m-btn--pill"
+                                       id="csvUploadModalTrigger">
+									<span>
+										<i class="la la-plus"></i>
+										<span>
+											CSV Upload
+										</span>
+									</span>
+                                    </a>
+                                    <div class="m-separator m-separator--dashed d-xl-none"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--end: Search Form -->
+                        <!--begin: Datatable -->
+                        <div class="m_datatable" id="stocks-data" data-raw-data="{{ stock_predictions }}"></div>
+                        <!--end: Datatable -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% include "admin/snippets/modal-large-predictions.html" %}
+    {% include "admin/snippets/modal-csv-upload.html" %}
+    {% include "admin/snippets/modal-large.html" %}
+{% endblock %}
+
+{% block extraScripts %}
+    <script type="text/javascript">
+        // Global Scripts
+        var BASE_DIR = '{{ BASE_DIR }}';
+        var URL_REMOVE_STOCK = "{% url 'admin.remove_stock' %}";
+        var URL_REMOVE_STOCK_PREDICTION = "{% url 'admin.remove_stock_prediction' %}";
+        var CURRENT_STOCK_ID = "{{stock.id}}";
+    </script>
+
+    <!--begin::Page Resources -->
+    <script src='{% static "admin/single_stock_predictions.datatable.js" %}' type="text/javascript"></script>
+    <script src='{% static "mainsite/assets/demo/default/custom/components/forms/widgets/dropzone.js" %}'
+            type="text/javascript"></script>
+    <script src='{% static "vendor/twitter-bootstrap-wizard/jquery.bootstrap.wizard.js" %}'
+            type="text/javascript"></script>
+    <!--end::Page Resources -->
+
+
+    <!-- Page scripts -->
+    <script type="text/javascript">
+        var URL_ADMIN_GET_STOCK_SUBSCRIPTIONS = "{% url 'admin.get_stock_subscriptions' %}";
+        var URL_ADMIN_REMOVE_SUBSCRIPTION_PLAN = "{% url 'admin.remove_stock_subscriptions' %}";
+        var CSRF_TOKEN = "{{csrf_token}}";
+
+        jQuery("#csvUploadModalTrigger").on("click", function (e) {
+            var $targetModal = jQuery('#csvUploadModal');
+
+            // var $modalForm = jQuery($targetModal).find('div.modal-body form');
+            jQuery($targetModal).modal({
+                backdrop: false
+            });
+
+            // Disable all tabs by default
+
+            jQuery('#rootwizard').bootstrapWizard('disable', 0);
+            jQuery('#rootwizard').bootstrapWizard('disable', 1);
+            jQuery('#rootwizard').bootstrapWizard('disable', 2);
+
+            jQuery('#rootwizard').bootstrapWizard('enable', 0);
+            $('#rootwizard').bootstrapWizard('first');
+        });
+
+        jQuery("#addNewModal").on("click", function (e) {
+            var $targetModal = jQuery('#myModal');
+
+            var $modalForm = jQuery($targetModal).find('div.modal-body form');
+            jQuery($modalForm).find("input[name='date']").val('');
+            jQuery($modalForm).find("input[name='high']").val('');
+            jQuery($modalForm).find("input[name='low']").val('');
+            jQuery($modalForm).find("input[name='close']").val('');
+            jQuery($modalForm).find("input[name='accuracy_prev_day']").val('');
+            jQuery($modalForm).find("input[name='stock_prediction_id']").val('');
+            jQuery($modalForm).find("input[name='status'][data-name='active']").attr('checked', 'checked');
+
+            jQuery($targetModal).modal({
+                backdrop: false
+            });
+        });
+
+
+        // Modal
+        $(document).ready(function () {
+            $('#rootwizard').bootstrapWizard({
+                onTabShow: function (tab, navigation, index) {
+                    var $total = navigation.find('li').length;
+                    var $current = index + 1;
+                    var $percent = ($current / $total) * 100;
+                    $('#rootwizard .progress-bar').css({width: $percent + '%'});
+                }
+            });
+
+        });
+        // Modal Ends
+
+        // <div class="col-xs-4 col-sm-3">
+        // <div class='input-group date' id='m_datepicker_2'>
+        // <input type='text' class="form-control m-input"  placeholder="Select date"/>
+        // <span class="input-group-addon">
+        // <i class="la la-calendar-check-o"></i>
+        // </span>
+        // </div>
+        // </div>
+
+        // Populate uploaded data to form
+        function populateCSVDataForm(data) {
+            var htmlForCSVForm = '';
+            var counter = 0;
+            $.each(data, function (key, val) {
+                // htmlForCSVForm += '<div class="col-xs-4 col-sm-3">';
+                // htmlForCSVForm += '<label>Date</label>';
+                // htmlForCSVForm += '<div class="m-input-group--square">';
+                // htmlForCSVForm += '<input type="text" name="data[][\'date\']" class="form-control m-input" placeholder="" value="'+val.date+'">';
+                // htmlForCSVForm += '</div></div>';
+                console.log(val.date, "$%^%&^");
+                htmlForCSVForm += '<div class="col-xs-4 col-sm-3">';
+                htmlForCSVForm += '<label>Date</label>';
+                htmlForCSVForm += '<div class="input-group date">';
+                htmlForCSVForm += '<input type="text" class="form-control m-input datepicker"  placeholder="Date" value="' + val.date + '" name="data[][\'date\']"/>';
+                htmlForCSVForm += '<span class="input-group-addon"><i class="la la-calendar-check-o"></i></span>';
+                htmlForCSVForm += '</div>';
+                htmlForCSVForm += '</div>';
+
+                htmlForCSVForm += '<div class="col-xs-4 col-sm-3">';
+                htmlForCSVForm += '<label class="">High</label>';
+                htmlForCSVForm += '<div class="m-input-group--square">';
+                htmlForCSVForm += '<input type="text" name="data[][\'high\']" class="form-control m-input" placeholder="" value="' + val.high + '">';
+                htmlForCSVForm += '</div></div>';
+
+                htmlForCSVForm += '<div class="col-xs-4 col-sm-3"><label>Low</label>';
+                htmlForCSVForm += '<div class="m-input-group--square">';
+                htmlForCSVForm += '<input type="text" name="data[][\'low\']" class="form-control m-input" placeholder="" value="' + val.low + '">';
+                htmlForCSVForm += '</div></div>';
+
+                htmlForCSVForm += '<div class="col-xs-4 col-sm-3"><label>Close</label>';
+                htmlForCSVForm += '<div class="input-group m-input-group m-input-group--square">';
+                htmlForCSVForm += '<input type="text" name="data[][\'close\']" class="form-control m-input" placeholder="" value="' + val.close + '">';
+                htmlForCSVForm += '</div></div>';
+
+                htmlForCSVForm += '<div class="col-xs-4 col-sm-3"><label>Accuracy of previous day</label>';
+                htmlForCSVForm += '<div class="input-group m-input-group m-input-group--square">';
+                htmlForCSVForm += '<input type="text" name="data[][\'accuracy_prev_day\']" class="form-control m-input" placeholder="" value="' + val.accuracy_prev_day + '">';
+                htmlForCSVForm += '</div></div>';
+
+                counter++;
+            })
+
+            $('.dyContent').html(htmlForCSVForm);
+
+            // Call datepicker
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+            });
+        }
+
+        function refreshCsvData(DatatableDataLocalDemoObj) {
+            $.ajax({
+                url: '{% url "admin.get_stock_predictions_single" %}',
+                method: 'POST',
+                data: {
+                    symbol: '{{ stock.symbol }}'
+                },
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    console.log("success", data)
+
+                    // reload JSON data
+                    $('#stocks-data').data('raw-data', data.all_stock);
+                    // loadJson();
+                    location.reload();
+                    console.log("Success", data)
+                    // DatatableDataLocalDemoObj.init();
+                },
+                error: function (e) {
+                    console.log("Error", e)
+                }
+
+            })
+        }
+
+        $(document).ready(function () {
+            // Dropzone
+
+            $("#csvUploadDropzone").dropzone({
+                url: $('#csvUploadDropzone').data('action'),
+                addRemoveLinks: true,
+                // maxFilesize: 5, saved// mbs
+                accept: function (file, done) {
+                    if (file.type != "text/csv") {
+                        done("Invalid file type, Please upload CSV file to continue!");
+                    }
+                    else {
+                        done();
+                    }
+                },
+                dictDefaultMessage: '<span class="text-center"><span class="font-lg visible-xs-block visible-sm-block visible-lg-block"><span class="font-lg"><i class="fa fa-caret-right text-danger"></i> Drop files <span class="font-xs">to upload</span></span><span>&nbsp&nbsp<h4 class="display-inline"> (Or Click)</h4></span>',
+                dictResponseError: 'Error uploading file!',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (file, response) {
+                    console.log("success", response)
+                    $(file.previewElement).find(".dz-error-message span").html(response);
+                    $(file.previewElement).find(".dz-error-mark").css("display", "none");
+
+                    populateCSVDataForm(response.data)
+
+                    // Enable next element
+                    $('#rootwizard').bootstrapWizard('enable', 0);
+                    $('#rootwizard').bootstrapWizard('enable', 1);
+                    $('#rootwizard').find('ul.accessBtns li.next>a').click();
+                    $('#rootwizard').bootstrapWizard('next');
+                    // $(file.previewElement).find(".dz-success-mark svg").css("color", "green");
+                    // $(file.previewElement).find(".dz-error-mark").css("display", "none");
+
+                },
+                error: function (file, response) {
+                    console.log("Error", response)
+                    $(file.previewElement).find(".dz-error-message span").html(response);
+                    $(file.previewElement).find(".dz-success-mark").css("display", "none");
+
+                    // Enable next element
+                    $('#rootwizard').bootstrapWizard('enable', 0);
+                    $('#rootwizard').bootstrapWizard('disable', 1);
+                }
+            });
+            // Dropzone Ends
+
+            $('#stockPredictionsForm').on('submit', function (e) {
+                e.preventDefault();
+                console.log("FOrm submitted", $(this).serializeArray())
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: 'POST',
+                    data: $(this).serializeArray(),
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    success: function (data) {
+                        $('span#csvUploadCount').html(data.total_records);
+                        $('span#csvUploadDuplicateCount').html('<br>Duplicate records found: ' + data.duplicate_count);
+                        $('#rootwizard').bootstrapWizard('enable', 2);
+
+                        // Refresh the csv data by caling the URL
+                        refreshCsvData(DatatableDataLocalDemo);
+                        // $('#rootwizard').find('ul.accessBtns li.next>a').click();
+                        $('#rootwizard').bootstrapWizard('next');
+
+                        // Reloading th csv table
+                        // loadJson();
+                    },
+                    error: function (e) {
+                        console.log('Error', e)
+                    }
+                });
+            })
+            //
+
+            // disable clicks
+            $('.accessBtns li a').addClass('disabled');
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+            });
+        });
+        jQuery("body").on("click", "a[data-edit-modal]", function (e) {
+
+            var $targetModal = jQuery('#myModal');
+            var $rawDataElem = $(this).parents('tr').find('[data-raw-json]');
+            var $modalForm = jQuery($targetModal).find('div.modal-body form');
+
+            jQuery($modalForm).find("input[name='symbol']").val(jQuery($rawDataElem).data('symbol'));
+            jQuery($modalForm).find("input[name='name']").val(jQuery($rawDataElem).data('name'));
+            jQuery($modalForm).find("input[name='sector']").val(jQuery($rawDataElem).data('sector'));
+            jQuery($modalForm).find("input[name='industry']").val(jQuery($rawDataElem).data('industry'));
+            jQuery($modalForm).find("input[name='id']").val(jQuery($rawDataElem).data('id'));
+            if ($rawDataElem.data("status"))
+                jQuery($modalForm).find("input[name='status'][data-name='active']").attr('checked', 'checked');
+            else
+                jQuery($modalForm).find("input[name='status'][data-name='inactive']").attr('checked', 'checked');
+
+            jQuery($targetModal).modal({
+                backdrop: false
+            });
+        });
+
+        // Manage Subscriptions modal
+        jQuery("body").on("click", "a[data-manage-subscriptions-modal]", function (e) {
+
+            var $targetModal = jQuery('#manageSubscriptionsModal');
+            var $rawDataElem = $(this).parents('tr').find('[data-raw-json]');
+            var $modalForm = jQuery($targetModal).find('div.modal-body form');
+            console.log("Changing stock hidden to", jQuery($rawDataElem).data('symbol'));
+            jQuery($targetModal).find("input[name='stock']").val("{{stock.symbol}}");
+
+            AjaxCall(URL_ADMIN_GET_STOCK_SUBSCRIPTIONS, "get", {'symbol': "{{stock.symbol}}"}, successPopulateForm, errorPopulateForm);
+
+            jQuery($targetModal).modal({
+                backdrop: false
+            });
+        });
+
+        // SHow subscription history modal
+        jQuery("body").on("click", "[data-subscriptions-history-modal]", function (e) {
+            var clickedStock = jQuery(this).parents('tr.m-datatable__row').find('td[data-field="symbol"] span').html();
+            console.log(clickedStock + "is clicked stock");
+            var $targetModal = jQuery('#subscriptionsHistoryModal');
+            var $rawDataElem = $(this).parents('tr').find('[data-raw-json]');
+            // var $modalForm = jQuery($targetModal).find('div.modal-body form');
+
+            // jQuery($targetModal).find("input[name='stock']").val(jQuery($rawDataElem).data('symbol'));
+            jQuery("span[data-stock-selected]").html(clickedStock);
+            AjaxCall(URL_ADMIN_GET_STOCK_SUBSCRIPTIONS, "get", {
+                'symbol': jQuery($rawDataElem).data('symbol'),
+                'removed': true
+            }, successPopulateStockSubsHistoryTable, errorPopulateStockSubsHistoryTable, {'$targetModal': $targetModal});
+        });
+
+        // Add action listener to edit details modal
+        jQuery("body").on("click", "a[data-delete-record]", function (e) {
+
+            if (!confirm("Are you sure to remove this record?"))
+                return;
+
+            // var $targetModal = jQuery('#myModal');
+            var $rawDataElem = $(this).parents('tr').find('[data-raw-json]');
+            window.location.href = URL_REMOVE_STOCK + "?id=" + jQuery($rawDataElem).data('id');
+        });
+
+        // Add action listener to edit details modal
+        jQuery("body").on("click", "a#viewDetails", function (e) {
+            var $rawDataElem = $(this).parents('tr').find('[data-raw-json]');
+            window.location.href = BASE_DIR + "/admin/stock/" + jQuery($rawDataElem).data('symbol');
+        });
+
+        // Populate a new plan form
+        jQuery("body").on("click", "[data-trigger='add-plan']", function (e) {
+
+            // Find index of the last form
+            var lastFormElem = jQuery('.form-block').last().find(".m-radio-list input[type='radio']");
+            if (lastFormElem.length == 0) {
+                index = 0;
+            } else {
+                index = $(lastFormElem).attr('name').match(/\d+/)[0]
+                index = parseInt(index) + 1;
+            }
+            var $rawDataElem = $(this).parents('tr').find('[data-raw-json]');
+
+            var $planFormWrap = jQuery(".plan-form-wrap");
+            var html = '<div class="col-sm-6 form-block">';
+            html += '<div class="form-group m-form__group">';
+            html += '<label for="example_input_full_name">';
+            html += 'Plan Duration <sup>(In months)</sup>';
+            html += '</label>';
+            html += '<input type="text" name="plan_duration[]" class="form-control m-input" placeholder="Example 1">';
+            html += '</div>';
+
+
+            html += '<div class="form-group m-form__group">';
+            html += '<label for="example_input_full_name">';
+            html += 'Valid Until Date';
+            html += '</label>';
+            html += '<input type="text" name="valid_until[]" class="form-control m-input datetimepicker" placeholder="Example 2018-11-23">';
+            html += '</div>';
+
+
+            // html += '<div class="form-group m-form__group">';
+            // html += '<label for="example_input_full_name">';
+            // html += 'Max month Purchasable <sup>(In months)</sup>';
+            // html += '</label>';
+            // html += '<input type="text" name="max_months_purchasable[]" class="form-control m-input" placeholder="Example 1">';
+            // html += '</div>';
+
+
+            html += '<div class="form-group m-form__group">';
+            html += '<label >Price</label>';
+            html += '<input type="text" name="price[]" class="form-control m-input" placeholder="Price(In USD). Example 1">';
+            html += '</div>';
+            html += '<div class="m-form__group form-group">';
+            html += '<label for="">Status</label>';
+            html += '<div class="m-radio-list">';
+            html += '<label class="m-radio">';
+            html += '<input type="radio" name="status[' + index + ']" data-name="active" value="1">';
+            html += 'Active<span></span></label>';
+            html += '<label class="m-radio">';
+            html += '<input type="radio" name="status[' + index + ']" data-name="inactive" value="0">Inactive<span></span>';
+            html += '</label>';
+            html += '</div>';
+            html += '<span class="m-form__help">';
+            html += 'Enable/Disable the plan.';
+            html += '</span>';
+            html += '<div>';
+            html += '<button data-trigger="remove-plan" type="button" class="btn btn-danger m-btn">Remove Plan</button>';
+            html += '<input type="hidden" name="ids[]" value="">';
+            html += '</div>';
+            html += '</div>';
+            html += '<hr>';
+            html += '</div>';
+            $planFormWrap.append(html);
+            $('.datetimepicker').datepicker({
+                format: 'yyyy-mm-dd',
+            });
+        });
+
+        // Populate a new plan form
+        jQuery("body").on("click", "[data-trigger='remove-plan']", function (e) {
+            var $this = $(this);
+            AjaxCall(URL_ADMIN_REMOVE_SUBSCRIPTION_PLAN, "post", {'plan_id': $(this).attr('data-id')}, removePlanSuccessCallback, removePlanErrorCallback, {'$this': $this});
+        });
+
+        // Hack checkbox to make only one clickable out of the 2 available
+        jQuery("body").on("click", ".m-radio-list input[type='radio']", function (e) {
+            // e.preventDefault();
+            console.log($(this));
+            $(this).parents(".m-radio-list").find("input[type='radio']").removeAttr("checked");
+            $(this).attr("checked", true);
+        });
+
+        function successPopulateStockSubsHistoryTable(data, extraData) {
+            // console.log("Data returned==", data);
+            stockSubsHistoryData = $.parseJSON(data.stock_subscriptions);
+            DatatableDataSubscriptionHistory.init();
+            jQuery(extraData.$targetModal).modal({
+                backdrop: false
+            });
+        }
+
+        function errorPopulateStockSubsHistoryTable(data, extraData) {
+            console.log("Error", data);
+            stockSubsHistoryData = [];
+            DatatableDataSubscriptionHistory.init();
+            jQuery(extraData.$targetModal).modal({
+                backdrop: false
+            });
+        }
+
+        function successPopulateForm(data) {
+
+            var $planFormWrap = jQuery(".plan-form-wrap");
+            $planFormWrap.empty();
+            stock_subs = $.parseJSON(data.stock_subscriptions);
+
+            if (stock_subs.length == 0) {
+                var html = '<div class="col-sm-12" style="border-bottom: 1px solid #e9ecef; padding-bottom: 30px;"><div class="form-group m-form__group"><label for="example_input_full_name">Max month of subscription</label>' +
+                    '<input type="text" name="max_months_purchasable" class="form-control m-input" value=""></div></div>';
+
+            }
+            else {
+                var html = '<div class="col-sm-12" style="border-bottom: 1px solid #e9ecef; padding-bottom: 30px;"><div class="form-group m-form__group"><label for="example_input_full_name">Max month of subscription</label>' +
+                    '<input type="text" name="max_months_purchasable" class="form-control m-input" value="' + stock_subs[0].fields.max_months_purchasable + '"></div></div>';
+
+            }
+            for (var i = 0; i < stock_subs.length; i++) {
+                console.log(stock_subs[i]);
+                html += '<div class="col-sm-6 form-block">';
+                html += '<div class="form-group m-form__group">';
+                html += '<label for="example_input_full_name">';
+                html += 'Plan Duration <sup>(In months)</sup>';
+                html += '</label>';
+                html += '<input type="text" name="plan_duration[]" class="form-control m-input" placeholder="Example 1" value="' + stock_subs[i].fields.plan_duration + '">';
+                html += '</div>';
+
+
+                html += '<div class="form-group m-form__group">';
+                html += '<label for="example_input_full_name">';
+                html += 'Valid Until Date';
+                html += '</label>';
+                console.log(typeof(stock_subs[i].fields.valid_until), stock_subs[i].fields.valid_until);
+                if (stock_subs[i].fields.valid_until == null) {
+                    html += '<input type="text" name="valid_until[]" class="form-control m-input datetimepicker" placeholder="Example 2018-11-23" value="">';
+                }
+                else {
+                    html += '<input type="text" name="valid_until[]" class="form-control m-input datetimepicker"  placeholder="Example 1" value="' + stock_subs[i].fields.valid_until + '">';
+                }
+                html += '</div>';
+
+
+                // html += '<div class="form-group m-form__group">';
+                // html += '<label for="example_input_full_name">';
+                // html += 'Max month of subscription';
+                // html += '</label>';
+                // if (stock_subs[i].fields.max_months_purchasable == null){
+                //     html += '<input type="text" name="max_months_purchasable[]" class="form-control m-input" placeholder="Example 1" value="">';
+                // }
+                // else{
+                // html += '<input type="text" name="max_months_purchasable[]" class="form-control m-input" placeholder="Example 1" value="' + stock_subs[i].fields.max_months_purchasable + '">';
+                // }
+                // html += '</div>';
+
+                html += '<div class="form-group m-form__group">';
+                html += '<label >Price</label>';
+                html += '<input type="text" name="price[]" class="form-control m-input" placeholder="Price(In USD). Example 1" value="' + stock_subs[i].fields.price + '">';
+                html += '</div>';
+                html += '<div class="m-form__group form-group">';
+                html += '<label for="">Status</label>';
+                html += '<div class="m-radio-list">';
+                html += '<label class="m-radio">';
+                html += '<input type="radio" name="status[' + i + ']" data-name="active" value="1"';
+                if (stock_subs[i].fields.status)
+                    html += ' checked ';
+                html += '>';
+                html += 'Active<span></span></label>';
+                html += '<label class="m-radio">';
+                html += '<input type="radio" name="status[' + i + ']" data-name="inactive" value="0"';
+                if (!stock_subs[i].fields.status)
+                    html += ' checked ';
+                html += '>Inactive<span></span>';
+                html += '</label>';
+                html += '</div>';
+                html += '<span class="m-form__help">';
+                html += 'Enable/Disable the plan.';
+                html += '</span>';
+                html += '<div>';
+                html += '<button data-trigger="remove-plan" type="button" data-id="' + stock_subs[i].pk + '" class="btn btn-danger m-btn">Remove Plan</button>';
+                html += '<input type="hidden" name="ids[]" value="' + stock_subs[i].pk + '">';
+                html += '</div>';
+                html += '</div>';
+                html += '<hr>';
+                html += '</div>';
+
+                $('.datetimepicker').datepicker({
+                    format: 'yyyy-mm-dd',
+                });
+            }
+            $planFormWrap.append(html);
+        }
+
+        function errorPopulateForm(data) {
+            console.log('error!!! populating form', data)
+        }
+
+        function updateStockFormSuccessCallback(s) {
+            console.log('success', s)
+            $.growl.notice({message: "Plan updated successfully!"});
+            $("#close_subscription_modal").click();
+        }
+
+        function updateStockFormErrorCallback(e) {
+            console.log('error=>', e);
+            $.growl.notice({message: "Error updating plan!"});
+        }
+
+        function removePlanSuccessCallback(e, extraData) {
+            console.log("success", e, extraData);
+            $(extraData.$this).parents('.form-block').hide('slow');
+            $(extraData.$this).parents('.form-block').remove();
+            $.growl.notice({message: "Plan removed successfully!"});
+        }
+
+        function removePlanErrorCallback(e, $this) {
+            console.log("error", e, $this);
+            $.growl.error({message: "Error trying to remove plan!"});
+        }
+
+        jQuery('body').on("submit", "#updateStockForm", function (e) {
+            e.preventDefault();
+            //$(this).append('<input type="hidden" name="stock" value="{{stock.symbol}}"></input>')
+            formData = $(this).serializeArray();
+            console.log(formData);
+
+            for (var i = 0; i < formData.length; i++) {
+                if (formData[i].name.startsWith("status")) {
+                    // update the name to remove index from the array
+                    formData[i].name = "status[]";
+                }
+            }
+            AjaxCall($(this).attr("action"), "post", formData, updateStockFormSuccessCallback, updateStockFormErrorCallback);
+        });
+
+    </script>
+    <!--end::Page Scripts -->
+{% endblock %}

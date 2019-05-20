@@ -1,0 +1,181 @@
+<div class="modal fade" id="csvUploadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">
+					Upload CSV
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">
+						&times;
+					</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				
+				<div class="m-portlet__body">
+					
+					<!-- Content for Modal -->
+					<div id="rootwizard">
+						<div class="navbar">
+							<div class="navbar-inner">
+							    <div class="container btn-group btn-group-lg" role="group" aria-label="Large button group">
+									<ul>
+									  	<li><a class="btn btn-secondary" href="#tab1" data-toggle="tab">Upload CSV</a></li>
+										<li><a class="btn btn-secondary" href="#tab2" data-toggle="tab">Verify Data</a></li>
+										<li><a class="btn btn-secondary" href="#tab3" data-toggle="tab">Finishing up!</a></li>
+									</ul>
+							 	</div>
+							</div>
+						</div>
+					    <div class="container">
+					    	<div id="bar" class="progress col-xs-12">
+					    		<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+					    	</div>
+					    </div>
+						<div class="tab-content">
+						    <div class="tab-pane" id="tab1">
+						    	<!--begin::Form-->
+								<form class="m-form m-form--fit m-form--label-align-right">
+									<div class="m-portlet__body">
+										<div class="form-group m-form__group row">
+											<br><br>
+											<div class="col-sm-12">
+												<div class="m-dropzone" data-action="{% url 'admin.upload_csv_predictions' %}" id="csvUploadDropzone">
+													<div class="m-dropzone__msg dz-message needsclick">
+														<h3 class="m-dropzone__msg-title">
+															Drop file here or click to upload.
+														</h3>
+														<span class="m-dropzone__msg-desc">
+														</span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+								</form>
+								<!--end::Form-->
+						    </div>
+						    <div class="tab-pane" id="tab2">
+						    	<!--begin::Form-->
+								<form action="{% url 'admin.update_stock_predictions' %}" class="m-form m-form--fit m-form--label-align-right m-form--group-seperator-dashed" id="stockPredictionsForm">
+									<div class="m-portlet__body">
+										<div class="form-group m-form__group row dyContent">
+											<!-- 
+											<div class="col-xs-4 col-sm-3">
+												<div class='input-group date' id='m_datepicker_2'>
+													<input type='text' class="form-control m-input"  placeholder="Select date"/>
+													<span class="input-group-addon">
+														<i class="la la-calendar-check-o"></i>
+													</span>
+												</div>
+											</div>
+
+											<div class="col-xs-4 col-sm-3">
+												<label>
+													Date
+												</label>
+												<div class="m-input-group--square">
+													<input type="text" class="form-control m-input" placeholder="">
+												</div>
+											</div>
+											
+											<div class="col-xs-4 col-sm-3">
+												<label class="">
+													High
+												</label>
+												<div class="m-input-group--square">
+													<input type="text" class="form-control m-input" placeholder="">
+												</div>
+											</div>
+											<div class="col-xs-4 col-sm-3">
+												<label>
+													Low
+												</label>
+												<div class="m-input-group--square">
+													<input type="text" class="form-control m-input" placeholder="">
+												</div>
+											</div>
+											<div class="col-xs-4 col-sm-3">
+												<label>
+													Close
+												</label>
+												<div class="input-group m-input-group m-input-group--square">
+													<input type="text" class="form-control m-input" placeholder="">
+												</div>
+											</div> -->
+										</div>
+
+									</div>
+									<div class="m-portlet__foot m-portlet__no-border m-portlet__foot--fit">
+										<div class="m-form__actions m-form__actions--solid">
+											<div class="row">
+												<div class="col-lg-4"></div>
+												<div class="col-lg-8">
+													<input type="hidden" name="stock_id" value="{{ stock.id }}">
+													<button type="submit" class="btn btn-primary">
+														Submit
+													</button>
+													<button type="reset" class="btn btn-secondary">
+														Reset
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</form>
+								<!--end::Form-->
+						    </div>
+							<div class="tab-pane" id="tab3">
+								<div class="container">
+									<div class="m-portlet__body">
+										<div class="m-demo-icon__preview" style="display: block; text-align: center; padding:10px;">
+											<i class="fa fa-check text-center" style="background-color: rgba(142, 142, 142, 0.99); padding: 20px; font-size: 50px; border-radius: 50%;"></i>
+										</div>
+										<div class="m-demo-icon__class text-center">
+											Successfully added <span id="csvUploadCount">3</span> records to DB!
+											<span id="csvUploadDuplicateCount"></span>
+										</div>
+									</div>
+								</div>
+						    </div>
+							<div class="tab-pane" id="tab4">
+								4
+						    </div>
+							<div class="tab-pane" id="tab5">
+								5
+						    </div>
+							<div class="tab-pane" id="tab6">
+								6
+						    </div>
+							<div class="tab-pane" id="tab7">
+								7
+						    </div>
+						</div>
+
+						<!-- <br> -->
+						<!-- <div class="container">
+							<ul class="pager wizard accessBtns nav nav-pills btn-group" style="vertical-align: middle;">
+								<li class="previous first" style="display:none;"><a href="#" class="btn btn-secondary">First</a></li>
+								<li class="previous" style="float: left;"><a href="#" class="btn btn-secondary">Previous</a></li>
+								<li class="next last" style="display:none;"><a href="#" class="btn btn-secondary">Last</a></li>
+							  	<li class="next" style="float: right;"><a href="#" class="btn btn-secondary">Next</a></li>
+							</ul>
+						</div> -->
+					</div>
+					<!-- //End of Content for Modal -->
+
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">
+					Close
+				</button>
+			</div>
+
+			</form>
+		</div>
+	</div>
+</div>
+<!--end::Modal

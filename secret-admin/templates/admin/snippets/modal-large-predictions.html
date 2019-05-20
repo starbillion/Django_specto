@@ -1,0 +1,94 @@
+<!--begin::Modal-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">
+					Edit Stock
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">
+						&times;
+					</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				
+				<form class="m-form m-form--fit" method="post" action="{% url 'admin.add_stock_predictions' %}">
+					<div class="m-portlet__body">
+						<div class="m-form__section m-form__section--first">
+							
+							{% csrf_token %}
+							<div class="form-group m-form__group">
+								<label>
+									Date
+								</label>
+								<input type="text" name="date" class="form-control m-input datepicker" required placeholder="Date">
+							</div>
+							<div class="form-group m-form__group">
+								<label >
+									High
+								</label>
+								<input type="text" name="high" class="form-control m-input" required placeholder="High">
+							</div>
+							<div class="form-group m-form__group">
+								<label >
+									Low
+								</label>
+								<input type="text" name="low" class="form-control m-input" required placeholder="Low">
+							</div>
+							<div class="form-group m-form__group">
+								<label >
+									Close
+								</label>
+								<input type="text" name="close" class="form-control m-input" required placeholder="Close">
+							</div>
+
+							<div class="form-group m-form__group">
+								<label >
+									Accuracy of previous day
+								</label>
+								<input type="text" name="accuracy_prev_day" class="form-control m-input" required placeholder="Accuracy of previous day">
+							</div>
+
+							<div class="m-form__group form-group">
+								<label for="">
+									Status
+								</label>
+								<div class="m-radio-list">
+									<label class="m-radio">
+										<input type="radio" name="status" data-name="active" value="1">
+										Active
+										<span></span>
+									</label>
+									<label class="m-radio">
+										<input type="radio" name="status" data-name="inactive" value="0">
+										Inactive
+										<span></span>
+									</label>
+								</div>
+								<span class="m-form__help">
+									Show/hide the company from front-end.
+								</span>
+								<input type="hidden" name="stock_id" value="{{stock.pk}}">
+								<input type="hidden" name="stock_prediction_id" value="">		
+							</div>
+
+						</div>
+					</div>
+
+			</div>
+			<div class="modal-footer">
+				<button type="submit" class="btn btn-primary">
+					Save
+				</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">
+					Close
+				</button>
+			</div>
+
+			</form>
+		</div>
+	</div>
+</div>
+<!--end::Modal-->

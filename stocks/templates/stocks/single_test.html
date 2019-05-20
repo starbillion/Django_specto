@@ -1,0 +1,2158 @@
+{#{% extends 'mainsite/layouts/private/master-frontend.html' %}#}
+{% extends 'mainsite/layouts/private/master-frontend-test.html' %}
+{% load static %}
+{% load generic_filters %}
+{% load stocks_filters %}
+{% block extraStyles %}
+    <style type="text/css">
+        @media (min-width: 993px) {
+            .m-header--fixed .m-body {
+                padding-top: 100px !important;
+            }
+        }
+
+        .stock-logo {
+            max-width: 100px;
+            height: auto;
+        }
+
+        .ui-datepicker {
+            z-index: 9999;
+        }
+
+        /**
+         * START: Datepicker
+         */
+        .datepicker-trigger {
+            width: 70%;
+        }
+
+        .datepicker-trigger input {
+            padding: 5px;
+            border: transparent;
+            /*display: inline-block	;*/
+        }
+
+        .no-left-margin {
+            /*margin-left: 0 !important;*/
+        }
+
+        input.datepicker-trigger {
+            /*border: transparent;
+            font-size: 1.3em;
+            font-weight: 600;*/
+        }
+
+        .button {
+            -webkit-transition-duration: 0.4s; /* Safari */
+            transition-duration: 0.4s;
+            background-color: #FFFFFF; /* Green */
+            border: white;
+        }
+
+        .button:hover {
+            background-color: #e7e7e7;
+            color: #5867dd;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .interval:hover {
+            color: #5867dd;
+            font-weight: bold;
+        }
+
+        .date_range {
+            display: inline-block;
+            border-radius: 2rem;
+            padding: 5px;
+        {#            padding-left: 25px;#} cursor: pointer;
+            background: #f8f8fb;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <!-- begin::Body -->
+    <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body"
+         style="font-family: sans-serif;">
+    <!-- BEGIN: Left Aside -->
+    <button class="m-aside-left-close  m-aside-left-close--skin-dark " id="m_aside_left_close_btn">
+        <i class="la la-close"></i>
+    </button>
+
+    <!-- END: Left Aside -->
+    <div class="m-grid__item m-grid__item--fluid m-wrapper">
+    <!-- BEGIN: Subheader -->
+    <div class="m-subheader ">
+        <div class="d-flex align-items-center">
+            <div class="mr-auto" style="color: #707070;">
+                <h3 class="m-subheader__title " style="font-size: 28px; ">{{ stock.name }}</h3>
+                <h4 style="font-size: 18px;">{{ stock.symbol }}</h4>
+                <h5 style="font-size: 15px;">{{ company.exchange }}</h5>
+            </div>
+        </div>
+    </div>
+    <!-- END: Subheader -->
+
+    <!--begin::Portlet-->
+    <div class="m-content">
+        <div class="m-portlet">
+            <div class="clearfix"></div>
+            <div class="m-portlet__body m-portlet__body--no-padding">
+                <div class="tab-content">
+
+                    <div class="tab-pane active" role="tabpanel" style="margin-top: 35px;">
+
+                        <div class="row">
+                            <div class="col-md-8 data-stats-wrap">
+                                <div style="-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);"
+                                     class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">
+                                    <div class="m-portlet__body">
+                                        {% get_stock_subscription_status stock.id as subscription_status %}
+                                        {% get_stock_subscription_plan stock.id as subscription_plan %}
+                                        <div class="row">
+                                            {% if subscription_status %}
+                                                <div class="col-xs-6 col-md-8">
+                                                    <div class="m-widget15__item">
+                                                        <span class="m-widget15__text"
+                                                              style="font-size: 22px;" id="prediction_title">
+												            Today's Predictions
+											            </span>
+                                                        <div class="m--space-10"></div>
+                                                    </div>
+                                                </div><!-- END: col-xs-6 -->
+
+                                                <div class="col-xs-6 col-md-4">
+                                                    <div align="right" style="margin-right: 15px;">
+                                                        <span class="date_range" id="date_string">
+                                                            <span class="m-subheader__daterange-label"
+                                                                  style="padding: 0.7rem 0.75rem 0.7rem 1.5rem;font-family: Roboto;font-size: 14px;">
+                                                                <span class="m-subheader__daterange-title"
+                                                                      id="today_yesterday"
+                                                                      style="font-weight: 400;color: #aaaeb8;"></span>
+                                                                <span class="m-subheader__daterange-date m--font-brand"
+                                                                      id="date"></span>
+                                                            </span>
+                                                            <a href="#"
+                                                               class="btn btn-sm btn-brand m-btn m-btn--icon m-btn--icon-only m-btn--custom m-btn--pill datepicker-trigger"
+                                                               id="date_change">
+                                                                <i class="la la-angle-down"></i>
+                                                            </a>
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                            {% endif %}
+                                        </div>
+                                        {% if subscription_status %}
+                                            <div class="row" id="prediction_body"
+                                                 style="margin-top: 125px;margin-left: 0px;margin-right: 0px;">
+                                        {% else %}
+                                            {% if subscription_plan %}
+                                                <div class="row" id="prediction_body"
+                                                     style="margin-top: 100px;margin-left: 0px;margin-right: 0px;">
+                                            {% else %}
+                                                <div class="row" id="prediction_body"
+                                                     style="margin-top: 190px;margin-left: 0px;margin-right: 0px;">
+                                            {% endif %}
+                                        {% endif %}
+                                        <!-- checking whether use is authenticated or not-->
+                                        {% if request.user.is_authenticated %}
+
+                                            <!-- checking whether stock is subscribed.-->
+                                            {% if subscription_status %}
+                                                <!-- checking whether stock prediction exists. -->
+                                                {% if stock_prediction %}
+                                                    <div class="col-sm-12 col-md-4">
+                                                        <div class="m-portlet m-portlet--border-bottom-brand ">
+                                                            <div class="m-portlet__body"
+                                                                 style="-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">
+                                                                <div class="m-widget26">
+                                                                    <div class="m-widget26__number">
+                                                                                <span style="font-size: 28px"
+                                                                                      data-high>{{ stock_prediction.low | point_round }}</span>
+                                                                        <small style="font-size: 16px;">
+                                                                            Low
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-12 col-md-4">
+                                                        <div class="m-portlet m-portlet--border-bottom-danger ">
+                                                            <div class="m-portlet__body"
+                                                                 style="-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">
+                                                                <div class="m-widget26">
+                                                                    <div class="m-widget26__number">
+                                                                                <span style="font-size: 28px"
+                                                                                      data-high>{{ stock_prediction.high | point_round }}</span>
+                                                                        <small style="font-size: 16px;">
+                                                                            High
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-12 col-md-4">
+                                                        <div class="m-portlet m-portlet--border-bottom-success ">
+                                                            <div class="m-portlet__body"
+                                                                 style="-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">
+                                                                <div class="m-widget26">
+                                                                    <div class="m-widget26__number">
+                                                                                <span style="font-size: 28px"
+                                                                                      data-high>{{ stock_prediction.close | point_round }}</span>
+                                                                        <small style="font-size: 16px;">
+                                                                            Close
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- checking whether stock prediction doesn't exist.-->
+                                                {% else %}
+                                                    <div class="col-sm-12">
+                                                        <div class="m-portlet m-portlet--border-bottom-prediction ">
+                                                            <div class="m-portlet__body"
+                                                                 style="padding-top: 4.5rem;">
+                                                                <div class="m-widget26"
+                                                                     style="font-size: 16px;">
+                                                                    There is no prediction data for the
+                                                                    selected date.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                <!-- checking whether stock is not subscribed.-->
+                                            {% else %}
+                                                <!-- if subscription plan exists.-->
+
+                                                {% if subscription_plan %}
+                                                    <div class="col-sm-12">
+                                                        <div class="m-portlet m-portlet--border-bottom-success ">
+
+                                                            <div class="m-portlet__body"
+                                                                    {% if not subscription_plan %}
+                                                                 style="padding-top: 4.5rem;"
+                                                                    {% endif %}>
+                                                                <div class="m-widget26">
+                                                                    {% check_if_stock_in_cart stock.id as stock_in_cart %}
+                                                                    {% if stock_in_cart %}
+                                                                        <a class="m-btn  btn btn-danger btn-sm"
+                                                                           data-subscribe="0"
+                                                                           data-id="{{ stock.id }}"
+                                                                           href="{% url 'payment.cart' %}"
+                                                                           role="button">Go to cart</a>
+                                                                        {#                                                                            {% else %}#}
+                                                                        {#                                                                                <a class="m-btn  btn btn-danger btn-sm"#}
+                                                                        {#                                                                                        {% if request.user.is_authenticated %}#}
+                                                                        {#                                                                                   data-add-to-cart-modal#}
+                                                                        {#                                                                                        {% endif %}#}
+                                                                        {#                                                                                   data-already-in-cart="0"#}
+                                                                        {#                                                                                   data-subscribe="0"#}
+                                                                        {#                                                                                   data-id="{{ stock.id }}"#}
+                                                                        {#                                                                                   data-symbol="{{ stock.symbol }}"#}
+                                                                        {#                                                                                   href="#"#}
+                                                                        {#                                                                                   role="button"#}
+                                                                        {#                                                                                        {% if not request.user.is_authenticated %}#}
+                                                                        {#                                                                                   data-toggle="m-popover"#}
+                                                                        {#                                                                                   data-content="Login required"#}
+                                                                        {#                                                                                   data-placement="top"#}
+                                                                        {#                                                                                        {% endif %}#}
+                                                                        {#                                                                                >Subscribe</a>#}
+                                                                    {% else %}
+                                                                        <center>
+                                                                            {% get_plans_of_stock stock.id as plans %}
+                                                                            {% for plan in plans %}
+                                                                                <div style='cursor: pointer; width:110px; display: inline-block; margin-left: 13px; margin-right: 13px; margin-bottom: 20px;-webkit-box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2); box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2);'
+                                                                                     onclick='add_to_cart({{ plan.id }}, {{ plan.plan_duration }}, 1, {{ plan.stock_id }}, "{{ stock.symbol }}")'>
+                                                                                    <div class=''
+                                                                                         style='background-color: #C6C6C6;padding:1rem 1.5rem 1rem 1.5rem;'>
+                                                                                        <div class='m-widget26__number'
+                                                                                             style='color: #ffffff'>
+                                                                                            <span style='font-size: 20px'
+                                                                                                  data-high>
+                                                                                            {{ plan.plan_duration }}
+                                                                                            <font style='font-size:14px'>month</font>
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div style='padding:1.5rem 1.5rem 1.5rem 1.5rem; font-size:23px; color:#616161; font-weight: 500;'>
+                                                                                        ${{ plan.price }}
+                                                                                    </div>
+                                                                                </div>
+                                                                            {% endfor %}
+                                                                        </center>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- if subscription plan doesn't exist-->
+                                                {% else %}
+                                                    <div class="col-sm-12">
+                                                        <div class="m-portlet m-portlet--border-bottom-prediction ">
+                                                            <div class="m-portlet__body"
+                                                                 style="padding-top: 4.5rem;">
+                                                                <div class="m-widget26"
+                                                                     style="font-size: 16px;">
+                                                                    Subscription plans will be available
+                                                                    soon.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endif %}
+                                            <!-- checking whether use is not authenticated.-->
+                                        {% else %}
+                                            <div class="col-sm-12">
+                                                <div class="m-portlet m-portlet--border-bottom-success ">
+                                                    <div class="m-portlet__body"
+                                                         style="padding-top: 4.5rem;">
+                                                        <div class="m-widget26" style="font-size: 16px;">
+                                                            <div class="m-widget26__number">
+                                                                You should <a href="{% url 'login' %}">Sign
+                                                                in</a> or <a href="{% url 'register' %}">Sign
+                                                                up</a> !
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        {% endif %}
+                                        </div><!-- END: .row -->
+                                        </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!--begin:: Widgets/Blog-->
+                                        <div style="-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);"
+                                             class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">
+                                            <div class="m-portlet__body">
+                                                <div class="m-widget19" style="font-family: sans-serif;">
+                                                    <div class="m-widget19__content" style="">
+                                                        <div class="m-widget19__header" style="width: 100%;">
+                                                            <div class="row">
+                                                                <div class="col-md-9">
+                                                                    <div class="m-widget19__user-img">
+                                                                        <img class="m-widget19__img"
+                                                                             src="{{ stock_logo }}"
+                                                                             alt="">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3" style="">
+                                                                    {% get_stock_fav_status stock.id as fav_status %}
+
+                                                                    {% if fav_status %}
+                                                                        <button href="#"
+                                                                                {% if request.user.is_authenticated %}
+                                                                                data-fav-trigger
+                                                                                {% endif %}
+                                                                                data-fav-status="1"
+                                                                                class="btn  btn-info m-btn btn-sm"
+                                                                                data-id="{{ stock.id }}"
+                                                                                {% if not request.user.is_authenticated %}
+                                                                                data-toggle="m-popover"
+                                                                                data-content="Login required"
+                                                                                data-placement="top"
+                                                                                {% endif %}
+                                                                                style="background-color: white; border-color: white;::hover{background-color: #ff4722}">
+                                                                            <i class="la la-heart"></i></button>
+                                                                    {% else %}
+                                                                        <button href="#"
+                                                                                {% if request.user.is_authenticated %}
+                                                                                data-fav-trigger
+                                                                                {% endif %}
+                                                                                data-fav-status="0"
+                                                                                class="btn  btn-default m-btn btn-sm"
+                                                                                data-id="{{ stock.id }}"
+                                                                                {% if not request.user.is_authenticated %}
+                                                                                data-toggle="m-popover"
+                                                                                data-content="Login required"
+                                                                                data-placement="top"
+                                                                                {% endif %}
+                                                                                style="background-color: white; border-color: white;::hover{background-color: #ff4722}">
+                                                                            <i class="la la-heart"></i></button>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="m-widget19__body">
+                                                            <div class="m-widget19__info">
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                    <span class="m-widget19__username"
+                                                                          style="font-size: 22px;">
+                                                                        {{ company.companyName }}
+                                                                    </span>
+                                                                        <br>
+                                                                        <span class="m-widget19__time"
+                                                                              style="font-size: 15px;">
+															            {{ company.industry }}
+														            </span>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="m-widget19__body">
+                                                            <div class="m-widget19__info">
+                                                                <div class="row" style="margin-top: 35px;">
+                                                                    <div class="col-md-12" style="display: inherit;">
+                                                                        <div class=""
+                                                                             style="font-size: 50px; color: #707070;"
+                                                                             id="latestPrice">
+                                                                            {{ stats_left.latestPrice|point_round }}
+                                                                        </div>
+                                                                        <div class="" style="margin:auto;">
+                                                                            <div class=""
+                                                                                 style="font-size: 18px;
+                                                                                         {% if stats_left.change < 0 %}
+                                                                                             color: #FF0000;
+                                                                                         {% else %}
+                                                                                             color: #009900;
+                                                                                         {% endif %}"
+                                                                                 align="left" id="change">
+                                                                                <font color="#707070">USD </font>{{ stats_left.changePercent|point_round_percent }}
+                                                                                ({{ stats_left.change|point_round }}%)
+                                                                            </div>
+                                                                            <div class="" align="left"
+                                                                                 style="font-size: 18px; color: #6A6A6A;">
+                                                                                Day's Change
+                                                                            </div>
+
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--end:: Widgets/Blog-->
+
+                                    </div>
+                                    {#                                <div class="col-md-12">#}
+                                    {#                                    <div id="chart_summary" style="height: 400px; min-width: 310px"></div>#}
+                                    {#                                </div>#}
+
+                                </div><!-- //END: Row -->
+                            </div>
+                            <!-- content of hitory of predictons-->
+                            <div class="tab-pane active" role="tabpanel"
+                                 style="margin-top: 35px;-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">
+                                <div class="row">
+                                    <div class="col-md-12 data-stats-wrap">
+                                        <div class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">
+                                            <div class="m-portlet__body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="m-widget15__item">
+
+                                                        <span class="m-widget15__text"
+                                                              style="font-size: 22px;">
+												            History of Predictions
+											            </span>
+
+                                                        </div>
+                                                    </div><!-- END: col-xs-6 -->
+
+
+                                                    <div class="col-md-6" style="display: inherit;">
+                                                        {#                                                        <div class="row">#}
+                                                        <div style="margin: auto;">
+                                                            <button type="button" onclick="changePeriodHistory(2);"
+                                                                    class="button" id="predic_2">1D
+                                                            </button>
+                                                            <button type="button" onclick="changePeriodHistory(3);"
+                                                                    class="button" id="predic_3">5D
+                                                            </button>
+                                                            <button type="button" onclick="changePeriodHistory(4);"
+                                                                    class="button" id="predic_4">1M
+                                                            </button>
+                                                            <button type="button" onclick="changePeriodHistory(5);"
+                                                                    class="button" id="predic_5">3M
+                                                            </button>
+                                                            <button type="button" onclick="changePeriodHistory(6);"
+                                                                    class="button" id="predic_6">6M
+                                                            </button>
+                                                            <button type="button" onclick="changePeriodHistory(7);"
+                                                                    class="button" id="predic_7">1Y
+                                                            </button>
+                                                            <button type="button" onclick="changePeriodHistory(8);"
+                                                                    class="button" id="predic_8">2Y
+                                                            </button>
+                                                            <button type="button" onclick="changePeriodHistory(9);"
+                                                                    class="button" id="predic_9">YTD
+                                                            </button>
+                                                            <button type="button" onclick="changePeriodHistory(10);"
+                                                                    class="button" id="predic_10"
+                                                                    style="border-bottom: 2px solid #5867dd">Max
+                                                            </button>
+                                                        </div>
+                                                        <div class=""
+                                                             style="border-right: 1px solid #efefef;">
+                                                            {#                                                        <div class="col-md-6">#}
+                                                            <div class="" align="center" id="total_accuracy"
+                                                                 style="font-size: 18px; margin-right: 20px; margin-left: 20px;">
+                                                                {{ total_accuracy | point_round }}%
+                                                            </div>
+                                                            <div class="" align="center"
+                                                                 style="color: #b3afaf;font-size: 10px;">
+                                                                All time avg. acc.
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="">
+                                                            <div class="" align="center" id="previous_day_accuracy"
+                                                                 style="font-size: 18px; margin-right: 20px; margin-left: 20px;">
+                                                                {% if stock_prediction.accuracy_prev_day %}
+                                                                    {{ stock_prediction.accuracy_prev_day |point_round }}
+                                                                    %
+                                                                {% else %}
+                                                                    0.00%
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="" align="center"
+                                                                 style="color: #b3afaf; font-size: 10px;">
+                                                                Previous Day
+                                                            </div>
+
+                                                        </div>
+                                                        {#                                                        </div>#}
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-xs-12 col-md-12">
+                                                        <div class="m--space-10"></div>
+                                                        <div id="chart_summary" style="height: 400px; min-width: 310px">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div><!-- //END: Row -->
+                            </div>
+                            <!-- content of historical data-->
+                            <div class="tab-pane active" role="tabpanel"
+                                 style="margin-top: 35px;-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">
+
+                                <div class="row">
+
+                                    <div class="col-md-12 data-stats-wrap">
+
+                                        <div class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">
+                                            <div class="m-portlet__body">
+
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="m-widget15__item">
+                                                            <span class="m-widget15__text"
+                                                                  style="font-size: 22px;">
+                                                                {{ stock.symbol }} Historical Data
+                                                            </span>
+                                                            <span id="change_of_value"></span>
+                                                            {#                                                            <div class="m--space-10"></div>#}
+                                                        </div>
+                                                    </div><!-- END: col-xs-6 -->
+
+                                                    <div class="col-md-6" style="display: inherit">
+                                                        <div style="margin-bottom: auto; margin-top: auto;">
+                                                            <button type="button" onclick="changePeriod(2);"
+                                                                    class="button" id="period_2">
+                                                                1D
+                                                            </button>
+                                                            <button type="button" onclick="changePeriod(3);"
+                                                                    class="button" id="period_3">
+                                                                5D
+                                                            </button>
+                                                            <button type="button" onclick="changePeriod(4);"
+                                                                    class="button" id="period_4">
+                                                                1M
+                                                            </button>
+                                                            <button type="button" onclick="changePeriod(5);"
+                                                                    class="button" id="period_5">
+                                                                3M
+                                                            </button>
+                                                            <button type="button" onclick="changePeriod(6);"
+                                                                    class="button" id="period_6">
+                                                                6M
+                                                            </button>
+                                                            <button type="button" onclick="changePeriod(7);"
+                                                                    class="button" id="period_7">
+                                                                1Y
+                                                            </button>
+                                                            <button type="button" onclick="changePeriod(8);"
+                                                                    class="button" id="period_8">
+                                                                2Y
+                                                            </button>
+                                                            <button type="button" onclick="changePeriod(9);"
+                                                                    class="button" id="period_9">
+                                                                YTD
+                                                            </button>
+                                                            <button type="button" onclick="changePeriod(10);"
+                                                                    class="button" id="period_10"
+                                                                    style="border-bottom: 2px solid #5867dd">Max
+                                                            </button>
+                                                        </div>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-primary dropdown-toggle"
+                                                                    type="button" data-toggle="dropdown"
+                                                                    id="graph_interval"
+                                                                    style="background-color: white;color: #000000; border-color: #FFFFFF">
+                                                                <img src="{% static 'mainsite/assets/images/interval.png' %}"
+                                                                     style="width: 20%;"/>
+                                                                Interval 1D
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li onclick="changeInterval('DD');"
+                                                                    style="cursor:pointer;margin-left: 10px;"
+                                                                    class="interval">
+                                                                    1 day
+                                                                </li>
+                                                                <li onclick="changeInterval('WW');"
+                                                                    style="cursor:pointer;margin-left: 10px;"
+                                                                    class="interval">
+                                                                    1 week
+                                                                </li>
+                                                                <li onclick="changeInterval('MM');"
+                                                                    style="cursor:pointer;margin-left: 10px;"
+                                                                    class="interval">
+                                                                    1 month
+                                                                </li>
+                                                                <li onclick="changeInterval('YYYY');"
+                                                                    style="cursor:pointer;margin-left: 10px;"
+                                                                    class="interval">
+                                                                    1 year
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-primary dropdown-toggle"
+                                                                    type="button" data-toggle="dropdown" id="graph_type"
+                                                                    style="background-color: white;color: #000000; border-color: #FFFFFF">
+                                                                <img src="{% static 'mainsite/assets/images/line.png' %}"
+                                                                     style="width: 23%;"/>
+                                                                Line
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li onclick="changeType_of_chart('line');"
+                                                                    style="cursor:pointer;" class="interval">
+                                                                    <img src="{% static 'mainsite/assets/images/line.png' %}"
+                                                                         style="width: 13%; height: 13%;margin-left: 10px; margin-bottom: 10px;"/>
+                                                                    Line
+                                                                </li>
+                                                                <li onclick="changeType_of_chart('ohlc');"
+                                                                    style="cursor:pointer;" class="interval">
+                                                                    <img src="{% static 'mainsite/assets/images/ohlc.png' %}"
+                                                                         style="width: 13%; height: 13%; margin-left: 10px; margin-bottom: 10px;"/>
+                                                                    OHLC
+                                                                </li>
+                                                                <li onclick="changeType_of_chart('candlestick');"
+                                                                    style="cursor:pointer;" class="interval">
+                                                                    <img src="{% static 'mainsite/assets/images/candle.png' %}"
+                                                                         style="width: 13%; height: 13%; margin-left: 10px; margin-bottom: 10px;"/>
+                                                                    Candle
+                                                                </li>
+                                                                <li onclick="changeType_of_chart('area');"
+                                                                    style="cursor:pointer;" class="interval">
+                                                                    <img src="{% static 'mainsite/assets/images/area.png' %}"
+                                                                         style="width: 13%; height: 13%; margin-left: 10px; margin-bottom: 10px;"/>
+                                                                    Area
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-xs-12 col-md-12">
+                                                        <div class="m--space-10"></div>
+                                                        <div id="history" style="height: 400px; min-width: 310px">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!-- //END: Row -->
+                            </div>
+                            <!-- content of profile -->
+                            <div class="tab-pane active" role="tabpanel"
+                                 style="margin-top: 35px;-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">
+                                <div class="row">
+                                    <div class="col-md-5 data-stats-wrap">
+                                        <div class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">
+                                            <div class="m-portlet__body">
+                                                <div class="row" style="font-family: sans-serif;">
+                                                    <div class="col-xs-12 col-md-12">
+                                                        <div class="m-widget15__item">
+                                                        <span class="m-widget15__text"
+                                                              style="font-size: 22px;">
+												            {{ company.symbol }} Profile Details
+											            </span>
+                                                            <div class="m--space-10"></div>
+                                                        </div>
+                                                        <div style="font-size: 16px;">
+                                                            {{ company.description }}
+                                                        </div>
+
+                                                    </div><!-- END: col-xs-6 -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <!--begin:: Widgets/Blog-->
+                                        <div class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">
+                                            <div class="m-portlet__body">
+                                                <div class="m-widget19">
+                                                    <div class="row"
+                                                         style="font-family: sans-serif;font-size: 17px; color: #232121e0;">
+                                                        <div class="col-md-6" style="">
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px; padding-bottom: 10px">
+                                                                    Previous Close
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px"
+                                                                     align="right" id="previousClose">
+                                                                    {{ stats_left.previousClose }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    Open
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="open">
+                                                                    {{ stats_left.open }}
+                                                                </div>
+                                                            </div>
+                                                            {#                                                        {% if stats_left.iexBidPrice != null and stats_left.iexBidPrice != 0%}#}
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;
+                                                                         {% if stats_left.iexBidPrice == null or stats_left.iexBidPrice == 0 %}
+                                                                             display: none;
+                                                                         {% endif %}
+                                                                         " id="bid_row">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    Bid
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="bid">
+
+                                                                    {{ stats_left.iexBidPrice|point_round }}
+                                                                    x {{ stats_left.iexBidSize }}
+
+
+                                                                </div>
+                                                            </div>
+
+                                                            {#                                                        {% if stats_left.iexAskPrice != null and stats_left.iexAskPrice != 0 %}#}
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;
+                                                                         {% if stats_left.iexAskPrice == null or stats_left.iexAskPrice == 0 %}
+                                                                             display: none;
+                                                                         {% endif %}
+                                                                         " id="ask_row">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    Ask
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="ask">
+
+                                                                    {{ stats_left.iexAskPrice | point_round }}
+                                                                    x {{ stats_left.iexAskSize }}
+
+                                                                </div>
+                                                            </div>
+                                                            {#                                                        {% endif %}#}
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    Day's Range
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="day_range">
+                                                                    {{ stats_left.low|point_round }}
+                                                                    - {{ stats_left.high|point_round }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    52 Week Range
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="week_range">
+                                                                    {{ stats_left.week52Low|point_round }}
+                                                                    - {{ stats_left.week52High|point_round }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    Volume
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="latestVolume">
+                                                                    {{ stats_left.latestVolume }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="padding-left: 0px; padding-right: 0px;padding-top: 10px">
+                                                                    Avg. Volume
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="padding-left: 0px; padding-right: 0px;font-weight: bold; padding-top: 10px"
+                                                                     align="right" id="avgTotalVolume">
+                                                                    {{ stats_left.avgTotalVolume }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px; padding-bottom: 10px">
+                                                                    Market Cap
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px"
+                                                                     align="right" id="marketCap">
+                                                                    {{ stats_left.marketCap|millify }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    Beta
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="beta">
+                                                                    {{ stats.beta|point_round }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    PE Ratio (TTM)
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="peRatio">
+                                                                    {% if stats_left.peRatio %}
+                                                                        {{ stats_left.peRatio | point_round }}
+                                                                    {% else %}
+                                                                        {{ 0 | point_round }}
+                                                                    {% endif %}
+
+
+                                                                </div>
+                                                            </div>
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    EPS (TTM)
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="ttmEPS">
+                                                                    {{ stats.ttmEPS | point_round }}
+                                                                </div>
+                                                            </div>
+                                                            {#                                                        <div class="row">#}
+                                                            {#                                                            <div class="col-md-6"#}
+                                                            {#                                                                 style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;">#}
+                                                            {#                                                                Earnings Date#}
+                                                            {#                                                            </div>#}
+                                                            {#                                                            <div class="col-md-6"#}
+                                                            {#                                                                 style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;"#}
+                                                            {#                                                                 align="right">#}
+                                                            {##}
+                                                            {#                                                            </div>#}
+                                                            {#                                                        </div>#}
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-8"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;padding-bottom: 10px; padding-top: 10px">
+                                                                    Forward Dividend & Yield
+                                                                </div>
+                                                                <div class="col-md-4"
+                                                                     style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;font-weight: bold;padding-bottom: 10px; padding-top: 10px"
+                                                                     align="right" id="dividend">
+                                                                    {{ stats.dividendRate|point_round }}
+                                                                    ({{ stats.dividendYield|point_round }}%)
+                                                                </div>
+                                                            </div>
+                                                            <div class="row"
+                                                                 style="padding-right: 15px; padding-left: 15px;">
+                                                                <div class="col-md-6"
+                                                                     style="padding-left: 0px; padding-right: 0px;padding-top: 10px">
+                                                                    Ex-Dividend Date
+                                                                </div>
+                                                                <div class="col-md-6"
+                                                                     style="padding-left: 0px; padding-right: 0px;font-weight: bold;padding-top: 10px"
+                                                                     align="right" id="exDividendDate">
+                                                                    {% if stats.exDividendDate != 0 %}
+                                                                        {{ stats.exDividendDate|datefilter }}
+                                                                        {#                                                                {% else %}#}
+                                                                    {% endif %}
+
+                                                                </div>
+                                                            </div>
+                                                            {#                                                        <div class="row">#}
+                                                            {#                                                            <div class="col-md-6"#}
+                                                            {#                                                                 style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;">#}
+                                                            {#                                                                1y Target Est#}
+                                                            {#                                                            </div>#}
+                                                            {#                                                            <div class="col-md-6"#}
+                                                            {#                                                                 style="border-bottom: 2px solid #e2e2e2;padding-left: 0px; padding-right: 0px;"#}
+                                                            {#                                                                 align="right">#}
+                                                            {##}
+                                                            {#                                                            </div>#}
+                                                            {#                                                        </div>#}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--end:: Widgets/Blog-->
+                                    </div>
+                                </div><!-- //END: Row -->
+                            </div>
+                            <!-- content of related news-->
+                            {#                            <div class="tab-pane active" role="tabpanel"#}
+                            {#                                 style="margin-top: 35px;-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">#}
+                            {##}
+                            {#                                <div class="row">#}
+                            {##}
+                            {#                                    <div class="col-md-12 data-stats-wrap">#}
+                            {##}
+                            {#                                        <div class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">#}
+                            {#                                            <div class="m-portlet__body">#}
+                            {##}
+                            {#                                                <div class="row">#}
+                            {#                                                    <div class="col-xs-12 col-md-12">#}
+                            {#                                                        <div class="m-widget15__item">#}
+                            {##}
+                            {#                                                        <span class="m-widget15__text"#}
+                            {#                                                              style="font-size: 22px;">#}
+                            {#												            Related News#}
+                            {#											            </span>#}
+                            {#                                                            <div class="m--space-10"></div>#}
+                            {##}
+                            {#                                                        </div>#}
+                            {#                                                    </div><!-- END: col-xs-6 -->#}
+                            {#                                                </div>#}
+                            {#                                                <div class="row">#}
+                            {#                                                    <div class="col-xs-12 col-md-12">#}
+                            {#                                                    <div class="m--space-10"></div>#}
+                            {#                                                        [ Coming soon ]#}
+                            {#                                                    </div>#}
+                            {#                                                </div>#}
+                            {#                                            </div>#}
+                            {#                                        </div>#}
+                            {#                                    </div>#}
+                            {#                                </div><!-- //END: Row -->#}
+                            {#                            </div>#}
+
+                            {% if largest_trades %}
+                                <!-- content of largest trades-->
+                                <div class="tab-pane active" role="tabpanel"
+                                     style="margin-top: 35px;-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">
+
+                                    <div class="row">
+
+                                        <div class="col-md-12 data-stats-wrap">
+
+                                            <div class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">
+                                                <div class="m-portlet__body">
+
+                                                    <div class="row">
+                                                        <div class="col-xs-12 col-md-12">
+                                                            <div class="m-widget15__item">
+
+                                                        <span class="m-widget15__text"
+                                                              style="font-size: 22px;">
+												            Largest Trades
+											            </span>
+                                                                <div class="m--space-10"></div>
+
+                                                            </div>
+                                                        </div><!-- END: col-xs-6 -->
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-xs-12 col-md-12">
+
+                                                            <table class="table table-striped table-bordered table-hover"
+                                                                   id="m_table_1"
+                                                                   style="width:100%">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th><b>Venue</b></th>
+                                                                    <th><b>Venue Name</b></th>
+                                                                    <th><b>Price</b></th>
+                                                                    <th><b>Size</b></th>
+                                                                    <th><b>Time</b></th>
+                                                                </tr>
+                                                                </thead>
+
+                                                                <tbody id="tdDetails">
+                                                                {% for trade in largest_trades %}
+                                                                    <tr>
+                                                                        <td>{{ trade.venue }}</td>
+                                                                        <td>{{ trade.venueName }}</td>
+                                                                        <td>{{ trade.price }}</td>
+                                                                        <td>{{ trade.size }}</td>
+                                                                        <td>{{ trade.time | date_convert }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                            <!--end: Datatable -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div><!-- //END: Row -->
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--end::Portlet-->
+        </div>
+    </div>
+    <!-- end:: Body -->
+
+    {% include "stocks/snippets/modal-cart.html" %}
+
+{% endblock %}
+
+{% block extraScripts %}
+
+    <script type="text/javascript">
+        var CSRF_TOKEN = "{{csrf_token}}";
+        var STOCK_SUBSCRIBE_URL = "{% url 'subscription.subscribe_stock' %}";
+        var STOCK_FAVOURITE_URL = "{% url 'favourites.favourite_stock' %}";
+        var STOCK_ADD_TO_CART_URL = "{% url 'add_to_cart' %}";
+        var STOCK_GET_ACTIVE_SUBSCRIPTIONS = "{% url 'subscription.get_active_plans' %}";
+        var STOCK_HIDE_SUBSCRIPTION_URL = "{% url 'subscription.hide_stock' %}";
+        var STOCK_GOT_TO_CART_URL = "{% url 'payment.cart' %}";
+        var URL_STOCK_GET_LIST = "{% url 'stocks.get_list' %}";
+        var PAGE_INDEX = 1;
+    </script>
+
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <script src='{% static "js/single_stock_page.datatable.js" %}' type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+        function setDate(dateString, splitSymbol= "-") {
+            // console.log(dateString, splitSymbol)
+            if (splitSymbol == '-') {
+                var dateArr = dateString.split("-");
+
+                var y = parseInt(dateArr[0]);
+                var m = parseInt(dateArr[1]);
+                m = m - 1;
+                var d = parseInt(dateArr[2]);
+
+                var date = new Date(y, m, d);
+            }
+            else {
+                var y = (dateString[0] + dateString[1] + dateString[2] + dateString[3]);
+                var m = (dateString[4] + dateString[5]);
+                m = m - 1;
+                var d = (dateString[6] + dateString[7]);
+                // var date = new Date(y, m, d);
+                return d + "-" + m + "-" + y;
+            }
+            return date.getTime();
+            return Math.floor(date.getTime() / 1000);
+        }
+
+        var TIME_SERIES_DATA_5Y = {};//{{stock_5y|safe}};
+        var TIME_SERIES_DATA_1d = {};//{{stock_1d|safe}};
+        // var TIME_SERIES_DATA_TODAY = {{stock_today|safe}};
+        // var TIME_SERIES_DATA_1m    = {{stock_1m|safe}};
+        // var TIME_SERIES_DATA_3m    = {{stock_3m|safe}};
+        // var TIME_SERIES_DATA_6m    = {{stock_6m|safe}};
+        // var TIME_SERIES_DATA_ytd   = {{stock_ytd|safe}};
+        // var TIME_SERIES_DATA_1y    = {{stock_1y|safe}};
+        // var TIME_SERIES_DATA_2y    = {{stock_2y|safe}};
+        // var TIME_SERIES_DATA_5y    = {{stock_5y|safe}};
+
+        var d1 = d2 = d3 = [];
+        var xLables = [];
+        var yLables = [];
+
+        var dates = [],
+            highs = [],
+            lows = [],
+            opens = [],
+            closes = [],
+            prediction_highs = [],
+            prediction_lows = [],
+            prediction_closes = []
+        var prediction_chart, history_chart;
+        // array for storing accuracies of every values
+        accuracy = [], setForCandleStick = [];
+
+        var chart_summary_dates = [],
+            chart_summary_highs = [],
+            chart_summary_lows = [],
+            chart_summary_closes = [];
+
+        AjaxCall("{% url 'stock.stats' %}", "get", {
+            'symbol': '{{stock.symbol}}',
+            'type': 'stock_5y_dict'
+        }, function (e) {
+            updateTimeSeries(e);
+            /*return console.log("Heyaaaa", e)*/
+        }, function () {
+            return console.log("Errorrr", e)
+        })
+
+        var get_chat_data = setInterval(function () {
+            AjaxCall("{% url 'stock.ajax_stock_single' %}", "get", {
+                'symbol': '{{stock.symbol}}',
+            }, function (e) {
+                var stats = e.data.stats;
+                var stats_left = e.data.stats_left;
+
+                $("#latestPrice").html(stats_left.latestPrice.toFixed(2));
+                var tem = (stats_left.changePercent * 100).toFixed(2);
+                if (tem > 0) {
+                    tem = "+" + tem;
+                }
+                $("#change").html("<font color='#707070'>USD </font>" + tem + " (" + stats_left.change.toFixed(2) + "%)");
+                if (stats_left.change.toFixed(2) < 0) {
+                    $("#change").css("color", "#FF0000");
+                }
+                else {
+                    $("#change").css("color", "#009900");
+                }
+
+                // prvious close
+                $("#previousClose").html(stats_left.previousClose.toFixed(2));
+
+                // open
+                $("#open").html(stats_left.open.toFixed(2));
+
+                // bid
+                if (stats_left.iexBidPrice != null && stats_left.iexBidPrice != 0) {
+
+                    $("#bid_row").css("display", "");
+                    $("#bid").html(stats_left.iexBidPrice.toFixed(2) + " x " + stats_left.iexBidSize);
+                }
+                else {
+                    $("#bid_row").css("display", "none");
+                }
+
+                // ask
+                if (stats_left.iexAskPrice != null && stats_left.iexAskPrice != 0) {
+                    $("#ask_row").css("display", "");
+                    $("#ask").html(stats_left.iexAskPrice.toFixed(2) + " x " + stats_left.iexAskSize);
+                }
+                else {
+                    $("#ask_row").css("display", "none");
+                }
+                // day's range
+                $("#day_range").html(stats_left.low.toFixed(2) + " - " + stats_left.high.toFixed(2));
+                // 52 week's range
+                $("#week_range").html(stats_left.week52Low.toFixed(2) + " - " + stats_left.week52High.toFixed(2));
+
+                //volume
+                if (stats_left.latestVolume != null) {
+                    $("#latestVolume").html(stats_left.latestVolume);
+
+                }
+                // avg.volume
+                $("#avgTotalVolume").html(stats_left.avgTotalVolume);
+                // market cap
+                $("#marketCap").html((stats_left.marketCap / 1000000000).toFixed(3) + "B");
+
+                // beta
+                $("#beta").html(stats.beta.toFixed(2));
+                // peratio (TTM)
+                if (stats_left.peRatio != null) {
+                    $("#peRatio").html(stats_left.peRatio.toFixed(2));
+
+                }
+                else {
+                    $("#peRatio").html(parseInt(0).toFixed(2));
+
+                }
+                // EPS (TTM)
+                $("#ttmEPS").html(stats.ttmEPS.toFixed(2));
+
+                // forward dividend & yield
+                $("#dividend").html(stats.dividendRate.toFixed(2) + "(" + stats.dividendYield.toFixed(2) + "%)");
+                // ex-dividend
+
+                if (stats.exDividendDate != null && stats.exDividendDate != 0) {
+                    $("#exDividendDate").html(stats.exDividendDate.split(" ")[0]);
+                }
+                else {
+                    $("#exDividendDate").html("");
+                }
+
+
+            }, function (e) {
+                return console.log("Errorrr", e)
+            })
+        }, 20000);
+
+        jQuery(document).on("click", "[data-add-to-cart-modal]", function (e) {
+            e.preventDefault();
+            var symbol = $('h3.m-subheader__title').html().trim();
+            var id = $(this).data('id');
+            AjaxCall(STOCK_GET_ACTIVE_SUBSCRIPTIONS, "post", {'id': id}, successShowCartForm, errorShowCartForm, {
+                'symbol': symbol,
+                'id': id,
+                '$this': $(this)
+            });
+        })
+
+        jQuery("[data-add-to-cart-form] form").on('submit', function (e) {
+            e.preventDefault();
+            AjaxCall(STOCK_ADD_TO_CART_URL, "post", $(this).serialize(), successProductAddToCart, errorProductAddToCart, {'symbol': $(this).find('input[name="product_symbol"]').val()});
+        })
+
+        function add_to_cart(id, plan_duration, quantity, product_id, product_symbol) {
+            var data = {
+                "id": id,
+                "plan_duration": plan_duration,
+                "quantity": quantity,
+                "product_id": product_id,
+                "product_symbol": product_symbol
+            }
+            AjaxCall(STOCK_ADD_TO_CART_URL, "post", data, successProductAddToCart, errorProductAddToCart, {'symbol': $(this).find('input[name="product_symbol"]').val()});
+
+        }
+
+        function successProductAddToCart(data, extraData) {
+            if (data.status == '1') {
+                $('#subsCartModal').modal('hide');
+                toastr.info(data.message);
+                updateCartIcon();
+                // jQuery('.m-widget24__title').each(function(key, val) {
+                symbol = jQuery('[data-add-to-cart-modal]').data('symbol');
+                // console.log("HEyaa");
+                if (extraData.symbol.toLowerCase() == symbol.toLowerCase()) {
+                    jQuery('[data-add-to-cart-modal]').html('Go to cart').removeAttr('data-add-to-cart-modal').attr('href', STOCK_GOT_TO_CART_URL).off("click");
+                }
+                // })
+            }
+            else
+                toastr.info(data.message);
+        }
+
+        function errorProductAddToCart(data, extraData) {
+            console.log("error", data, extraData);
+        }
+
+        // Cart form handlers
+        function successShowCartForm(data, extraData) {
+            targetModal = "#subsCartModal";
+
+            cartForm = jQuery("[data-add-to-cart-form]");
+            var plans = $.parseJSON(data.plans);
+            var symbol = extraData.symbol;
+            var id = extraData.id;
+
+            jQuery(cartForm).find("[data-symbol]").html(symbol);
+            {#            priceFirstPlan = 'N.A';#}
+            priceFirstPlan = '';
+            plansHtml = "<center>";
+            if (plans.length > 0) {
+                jQuery(cartForm).find('form').removeClass('hidden');
+                jQuery(cartForm).find('[data-invalid-plans]').addClass('hidden');
+
+                for (var i = 0; i < plans.length; i++) {
+                    plansHtml += "<div style='cursor: pointer; width:110px; display: inline-block; margin-left: 13px; margin-right: 13px; margin-bottom: 20px;" +
+                        "-webkit-box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2); box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2);' " +
+                        "onclick='add_to_cart(" + plans[i].pk + "," + plans[i].fields.plan_duration + ", 1, " + id + ",\"" + symbol + "\"" + ")'>" +
+                        "<div class='' style='background-color: #C6C6C6;padding:1rem 1.5rem 1rem 1.5rem;'>" +
+                        "<div class='m-widget26__number' style='color: #ffffff'>" +
+                        "<span style='font-size: 20px' data-high>" + plans[i].fields.plan_duration + " <font style='font-size:14px'>month</font></span></div></div>" +
+                        "<div style='padding:1.5rem 1.5rem 1.5rem 1.5rem; font-size:23px; color:#616161; font-weight: 500;'>$" + plans[i].fields.price + "</div></div>"
+
+                }
+                priceFirstPlan = plans[0].fields.price;
+            } else {
+                jQuery(cartForm).find('[data-invalid-plans]').removeClass('hidden');
+                jQuery(cartForm).find('form').addClass('hidden');
+            }
+            jQuery(cartForm).find('span[data-plan-price]').html(priceFirstPlan);
+            jQuery(cartForm).find('input[name="product_id"]').val(id);
+            jQuery(cartForm).find("[data-plans]").html(plansHtml + "</center>");
+            jQuery(cartForm).find("input[name='product_symbol']").val(symbol);
+            jQuery(targetModal).modal({
+                backdrop: false
+            });
+        }
+
+        function add_to_cart(id, plan_duration, quantity, product_id, product_symbol) {
+            var data = {
+                "id": id,
+                "plan_duration": plan_duration,
+                "quantity": quantity,
+                "product_id": product_id,
+                "product_symbol": product_symbol
+            }
+            AjaxCall(STOCK_ADD_TO_CART_URL, "post", data, successProductAddToCart, errorProductAddToCart, {'symbol': $(this).find('input[name="product_symbol"]').val()});
+
+        }
+
+        function errorShowCartForm(data, extraData) {
+            console.log("Success", data, extraData);
+        }
+
+        function updateTimeSeries(data) {
+            console.log("Call received from ajax result", data);
+            earnings_tbl_html = '';
+            TIME_SERIES_DATA_5Y = data.data.stock_5y_dict;
+            //-----amchart
+            var chartData = [];
+            generateChartData();
+
+            function generateChartData() {
+                var firstDate = new Date();
+                firstDate.setHours(0, 0, 0, 0);
+                firstDate.setDate(firstDate.getDate() - 2000);
+
+                for (var i = 0; i < TIME_SERIES_DATA_5Y.length; i++) {
+
+                    var newDate = setDate(TIME_SERIES_DATA_5Y[i].date);
+                    chartData[i] = ({
+                        date: newDate,
+                        open: parseFloat(TIME_SERIES_DATA_5Y[i].open).toFixed(2),
+                        close: parseFloat(TIME_SERIES_DATA_5Y[i].close).toFixed(2),
+                        high: parseFloat(TIME_SERIES_DATA_5Y[i].high).toFixed(2),
+                        low: parseFloat(TIME_SERIES_DATA_5Y[i].low).toFixed(2),
+                        accuracy: TIME_SERIES_DATA_5Y[i].accuracy,
+                    });
+                }
+            }
+
+            var stockEvents_body = [];
+
+            {% if stock_prediction %}
+                var high_str = "Prediction High: " + {{ stock_prediction.high }};
+                var low_str = "Prediction Low: " + {{ stock_prediction.low }};
+                var close_str = "Prediction Close: " + {{ stock_prediction.close }};
+                stockEvents_body.push({
+                    date: new Date({{ stock_prediction.prediction_date.year }}, {{ stock_prediction.prediction_date.month }}, {{ stock_prediction.prediction_date.day }}),
+                    {#                    date: new Date(2017, 08, 13),#}
+                    type: "sign",
+                    backgroundColor: '{{ high_color }}',
+                    graph: "g1",
+                    text: "H",
+                    description: high_str,
+                    value: {{ stock_prediction.high }}
+                });
+                stockEvents_body.push({
+                    date: new Date({{ stock_prediction.prediction_date.year }}, {{ stock_prediction.prediction_date.month }}, {{ stock_prediction.prediction_date.day }}),
+                    {#                    date: new Date(2017, 08, 13),#}
+                    type: "sign",
+                    backgroundColor: '{{ low_color }}',
+                    graph: "g1",
+                    text: "L",
+                    description: low_str,
+                    value: {{ stock_prediction.low }}
+                });
+                stockEvents_body.push({
+                    date: new Date({{ stock_prediction.prediction_date.year }}, {{ stock_prediction.prediction_date.month }}, {{ stock_prediction.prediction_date.day }}),
+                    {#                    date: new Date(2017, 08, 13),#}
+                    type: "sign",
+                    backgroundColor: '{{ close_color }}',
+                    graph: "g1",
+                    text: "C",
+                    description: close_str,
+                    value: {{ stock_prediction.close }}
+                });
+            {% endif %}
+
+            // drawing the chart for history of predictions
+            prediction_chart = AmCharts.makeChart("chart_summary", {
+                type: "stock",
+                theme: "light",
+                dataSets: [{
+                    fieldMappings: [{
+                        fromField: "open",
+                        toField: "open"
+                    }, {
+                        fromField: "close",
+                        toField: "close"
+                    }, {
+                        fromField: "high",
+                        toField: "high"
+                    }, {
+                        fromField: "low",
+                        toField: "low"
+                    }, {
+                        fromField: "accuracy",
+                        toField: "accuracy"
+                    }, {
+                        fromField: "rsi",
+                        toField: "rsi"
+                    }],
+                    color: "#7f8da9",
+                    dataProvider: chartData,
+                    categoryField: "date",
+                    stockEvents: stockEvents_body
+                }],
+
+                {#                categoryAxesSettings: {#}
+                {#                    equalSpacing: true,#}
+                {#                },#}
+                mouseWheelZoomEnabled: true,
+                panels: [{
+                    title: "Value",
+                    showCategoryAxis: false,
+                    percentHeight: 70,
+                    valueAxes: [{
+                        id: "v1",
+                        dashLength: 5
+                    }],
+
+                    categoryAxis: {
+                        dashLength: 5
+                    },
+
+                    stockGraphs: [{
+                        id: "g1",
+                        title: "High",
+                        valueField: "high",
+                        type: "line",
+                        useDataSetColors: false,
+                        lineColor: '{{ high_color }}',
+                        balloonText: "High:<b>[[value]]</b>",
+                        showBalloon: true,
+
+                    },
+                        {
+                            id: "g2",
+                            title: "Low",
+                            valueField: "low",
+                            type: "line",
+                            useDataSetColors: false,
+                            lineColor: '{{ low_color }}',
+                            balloonText: "Low:<b>[[value]]</b>",
+                            showBalloon: true,
+                        },
+                        {
+                            id: "g3",
+                            title: "Close",
+                            valueField: "close",
+                            type: "line",
+                            useDataSetColors: false,
+                            lineColor: '{{ close_color }}',
+                            balloonText: "Close:<b>[[value]]</b>",
+                            showBalloon: true,
+                        }],
+
+                },
+                    {
+                        {#                        title: "Accuracy",#}
+                        percentHeight: 30,
+                        marginTop: 1,
+                        showCategoryAxis: true,
+                        valueAxes: [{
+                            id: "v3",
+                            dashLength: 5
+                        }],
+
+                        categoryAxis: {
+                            dashLength: 5
+                        },
+
+                        stockGraphs: [{
+                            valueField: "accuracy",
+                            type: "column",
+                            useDataSetColors: false,
+                            lineColor: '{{ accuracy_color }}',
+                            balloonText: "Accuracy:<b>[[value]] %</b>",
+                            showBalloon: true,
+                            fillAlphas: false,
+                            angle: 30,
+                            depth3D: 15
+                        }],
+
+                        stockLegend: {
+                            markerType: "diamond",
+                            markerSize: 10,
+                            labelText: "Accuracy",
+                            fontSize: 14,
+                            color: "#707070"
+                        }
+                    }
+                ],
+
+                chartScrollbarSettings: {
+
+                    graph: "g1",
+                    graphType: "line",
+                    usePeriod: "WW",
+                    graphFillColor: "#cecece",
+                    backgroundColor: "#e3e3e3",
+                    selectedBackgroundColor: "#ebedf2",
+                    selectedGraphFillColor: "#a8aba4",
+                },
+
+
+                chartCursorSettings: {
+                    valueLineBalloonEnabled: true,
+                    valueLineEnabled: true,
+                    valueBalloonsEnabled: true,
+                    cursorColor: "#716aca",
+
+                },
+
+                periodSelector: {
+                    position: "top",
+                    periods: [{
+                        period: "DD",
+                        count: 1,
+                        label: "1D"
+                    }, {
+                        period: "DD",
+                        count: 5,
+                        label: "5D"
+                    }, {
+                        period: "MM",
+                        count: 1,
+                        selected: true,
+                        label: "1M"
+                    }, {
+                        period: "MM",
+                        count: 3,
+                        label: "3M"
+                    }, {
+                        period: "MM",
+                        count: 6,
+                        label: "6M"
+                    }, {
+                        period: "YYYY",
+                        count: 1,
+                        label: "1Y"
+                    }, {
+                        period: "YYYY",
+                        count: 2,
+                        label: "2Y"
+                    }, {
+                        period: "YTD",
+                        label: "YTD"
+                    }, {
+                        period: "MAX",
+                        label: "Max",
+                        selected: true
+                    }]
+                }
+            });
+            // drawing the chart for history of predictions
+
+            history_chart = AmCharts.makeChart("history", {
+                type: "stock",
+                theme: "light",
+                dataSets: [{
+
+                    fieldMappings: [
+                        {
+                            fromField: "open",
+                            toField: "open"
+                        },
+                        {
+                            fromField: "close",
+                            toField: "close"
+                        },
+                        {
+                            fromField: "high",
+                            toField: "high"
+                        },
+                        {
+                            fromField: "low",
+                            toField: "low"
+                        }],
+                    color: "#7f8da9",
+                    dataProvider: chartData,
+                    categoryField: "date",
+                    stockEvents: []
+                }],
+                categoryAxesSettings: {
+                    maxSeries: 1,
+                    groupToPeriods: ["DD"],
+                    parseDates: true,
+                },
+                mouseWheelZoomEnabled: true,
+
+                panels: [{
+                    title: "Value",
+                    showCategoryAxis: true,
+                    percentHeight: 100,
+                    valueAxes: [{
+                        id: "v2",
+                        dashLength: 5
+                    }],
+
+                    categoryAxis: {
+                        dashLength: 5
+                    },
+
+                    stockGraphs: [
+                        {
+                            type: "line",
+                            id: "g1",
+                            balloonText: "Low:<b>[[low]]</b><br>High:<b>[[high]]</b><br>Close:<b>[[close]]</b>",
+                            openField: "open",
+                            closeField: "close",
+                            highField: "high",
+                            lowField: "low",
+                            valueField: "close",
+                            lineColor: "#36a3f7",
+                            useDataSetColors: false,
+                            showBalloon: true,
+                        }
+                    ],
+                }
+                ],
+
+                chartScrollbarSettings: {
+                    graph: "g1",
+                    graphType: "line",
+                    graphFillColor: "#cecece",
+                    selectedBackgroundColor: "#ebedf2",
+                    backgroundColor: "#e3e3e3",
+                    selectedGraphFillColor: "#a8aba4",
+                },
+
+                chartCursorSettings: {
+                    valueLineBalloonEnabled: true,
+                    valueLineEnabled: true,
+                    valueBalloonsEnabled: true,
+                    cursorPosition: "mouse",
+                    selectWithoutZooming: true,
+                    cursorColor: "#716aca",
+                    listeners: [{
+                        event: "selected",
+                        method: function (event) {
+                            var stockEvents = [];
+
+                            var start_value, end_value;
+                            // iterating all the points, get start point and end one
+                            for (var x in history_chart.dataSets[0].dataProvider) {
+                                var dataPoint = history_chart.dataSets[0].dataProvider[x];
+
+                                if (dataPoint.date == event.start) {
+                                    start_value = dataPoint;
+                                }
+                                if (dataPoint.date <= event.end) {
+                                    end_value = dataPoint;
+                                }
+                            }
+
+                            // drawing start point
+                            {#                            var description = "Low:" + start_value.low + "</br>High:" + start_value.high + "</br>Close:" + start_value.close;#}
+                            stockEvents.push({
+                                date: new Date(event.start),
+                                type: "sign",
+                                backgroundColor: '#00ff00',
+                                graph: "g1",
+                                {#                                description: description,#}
+                                text: "S",
+                                value: parseFloat(start_value.close)
+                            });
+                            var change_of_value = '';
+                            // if increase
+                            if (parseFloat(start_value.close) < parseFloat(end_value.close)) {
+                                /**
+                                 var description = "---Increase---</br>Low:" +
+                                 (parseFloat(end_value.low) - parseFloat(start_value.low)).toFixed(2) +
+                                 "</br>High:" + (parseFloat(end_value.high) - parseFloat(start_value.high)).toFixed(2) +
+                                 "</br>Close:" + (parseFloat(end_value.close) - parseFloat(start_value.close)).toFixed(2);
+                                 **/
+                                stockEvents.push({
+                                    date: new Date(event.end),
+                                    type: "arrowUp",
+                                    borderColor: '#00ff00',
+                                    rollOverColor: '#00ff00',
+                                    backgroundColor: '#00ff00',
+                                    graph: "g1",
+                                    {#                                    description: description,#}
+                                    value: parseFloat(end_value.close)
+                                });
+                                change_of_value = "<span class='m-badge  m-badge--success m-badge--wide' style='font-size:15px; margin-top: -6px;'>" + (parseFloat(end_value.close) - parseFloat(start_value.close)).toFixed(2) + "</span>";
+                            }
+                            else if (parseFloat(start_value.close) == parseFloat(end_value.close)) {
+                                /**
+                                 var description = "---Increase---</br>Low:" +
+                                 (parseFloat(end_value.low) - parseFloat(start_value.low)).toFixed(2) +
+                                 "</br>High:" + (parseFloat(end_value.high) - parseFloat(start_value.high)).toFixed(2) +
+                                 "</br>Close:" + (parseFloat(end_value.close) - parseFloat(start_value.close)).toFixed(2);
+                                 **/
+                                stockEvents.push({
+                                    date: new Date(event.end),
+                                    type: "sign",
+                                    borderColor: '#00ff00',
+                                    rollOverColor: '#00ff00',
+                                    backgroundColor: '#00ff00',
+                                    graph: "g1",
+                                    {#                                    description: description,#}
+                                    value: parseFloat(end_value.close)
+                                });
+                                change_of_value = "<span class='m-badge  m-badge--info m-badge--wide' style='font-size:15px; margin-top: -6px;'>No change</span>";
+                            }
+                            // in case of decrease
+                            else {
+                                /**
+                                 var description = "---Decrease---</br>Low:" +
+                                 (parseFloat(start_value.low) - parseFloat(end_value.low)).toFixed(2) +
+                                 "</br>High:" + (parseFloat(start_value.high) - parseFloat(end_value.high)).toFixed(2) +
+                                 "</br>Close:" + (parseFloat(start_value.close) - parseFloat(end_value.close)).toFixed(2);
+                                 **/
+                                stockEvents.push({
+                                    date: new Date(event.end),
+                                    type: "arrowDown",
+                                    borderColor: '#ff0000',
+                                    rollOverColor: '#ff0000',
+                                    backgroundColor: '#ff0000',
+                                    graph: "g1",
+                                    {#                                    description: description,#}
+                                    value: parseFloat(end_value.close)
+                                });
+                                change_of_value = "<span class='m-badge  m-badge--danger m-badge--wide' style='font-size:15px; margin-top: -6px;'>" + (parseFloat(start_value.close) - parseFloat(end_value.close)).toFixed(2) + "</span>";
+                            }
+                            // setting stockEvents
+                            history_chart.dataSets[0].stockEvents = stockEvents;
+                            // redrawing the stock graph
+                            history_chart.validateData();
+                            // displaying value of change
+                            $("#change_of_value").html(change_of_value);
+                        }
+                    }]
+
+                },
+                periodSelector: {
+                    position: "top",
+                    periods: [{
+                        period: "DD",
+                        count: 1,
+                        label: "1D"
+                    }, {
+                        period: "DD",
+                        count: 5,
+                        label: "5D"
+                    }, {
+                        period: "MM",
+                        count: 1,
+
+                        label: "1M"
+                    }, {
+                        period: "MM",
+                        count: 3,
+                        label: "3M"
+                    }, {
+                        period: "MM",
+                        count: 6,
+                        label: "6M"
+                    }, {
+                        period: "YYYY",
+                        count: 1,
+                        label: "1Y"
+                    }, {
+                        period: "YYYY",
+                        count: 2,
+                        label: "2Y"
+                    }, {
+                        period: "YTD",
+                        label: "YTD"
+                    }, {
+                        period: "MAX",
+                        label: "Max",
+                        selected: true
+                    }]
+                }
+            });
+        }
+
+        function changeType_of_chart(type) {
+            switch (type) {
+                case 'line':
+                    history_chart.panels[0].stockGraphs[0].type = 'line';
+                    history_chart.panels[0].stockGraphs[0].lineAlpha = 1;
+                    history_chart.panels[0].stockGraphs[0].lineColor = "#36a3f7";
+                    history_chart.panels[0].stockGraphs[0].fillAlphas = 0;
+                    history_chart.validateNow();
+                    $("#graph_type").html('<img src="{% static 'mainsite/assets/images/line.png' %}"style="width: 23%;"/> Line');
+                    break;
+                case 'area':
+                    history_chart.panels[0].stockGraphs[0].type = 'line';
+                    history_chart.panels[0].stockGraphs[0].lineAlpha = 1;
+                    history_chart.panels[0].stockGraphs[0].lineColor = "#36a3f7";
+                    history_chart.panels[0].stockGraphs[0].fillAlphas = 0.3;
+                    history_chart.panels[0].stockGraphs[0].fillColors = "#36a3f7";
+                    history_chart.validateNow();
+                    $("#graph_type").html('<img src="{% static 'mainsite/assets/images/area.png' %}"style="width: 23%;"/> Area');
+                    break;
+                case 'ohlc':
+                    history_chart.panels[0].stockGraphs[0].type = 'ohlc';
+                    history_chart.panels[0].stockGraphs[0].fillAlphas = 1;
+                    history_chart.panels[0].stockGraphs[0].lineColor = "#FF0000";
+                    history_chart.panels[0].stockGraphs[0].fillColors = "#FF0000";
+                    history_chart.panels[0].stockGraphs[0].negativeLineColor = "#00ff00";
+                    history_chart.panels[0].stockGraphs[0].negativeFillColors = "#00ff00";
+                    history_chart.validateNow();
+                    $("#graph_type").html('<img src="{% static 'mainsite/assets/images/ohlc.png' %}"style="width: 23%;"/> OHLC');
+                    break;
+                case 'candlestick':
+                    history_chart.panels[0].stockGraphs[0].type = 'candlestick';
+                    history_chart.panels[0].stockGraphs[0].fillAlphas = 1;
+                    history_chart.panels[0].stockGraphs[0].lineColor = "#00ff00";
+                    history_chart.panels[0].stockGraphs[0].fillColors = "#00ff00";
+                    history_chart.panels[0].stockGraphs[0].negativeLineColor = "#FF0000";
+                    history_chart.panels[0].stockGraphs[0].negativeFillColors = "#FF0000";
+                    history_chart.validateNow();
+                    $("#graph_type").html('<img src="{% static 'mainsite/assets/images/candle.png' %}"style="width: 18%;"/> Candle');
+                    break;
+            }
+        }
+
+        function changeInterval(interval) {
+            history_chart.categoryAxesSettings.groupToPeriods = [interval];
+            history_chart.validateData();
+            switch (interval) {
+                case "DD":
+                    $("#graph_interval").html('<img src="{% static 'mainsite/assets/images/interval.png' %}"style="width: 20%;"/> Interval 1D');
+                    break;
+                case "WW":
+                    $("#graph_interval").html('<img src="{% static 'mainsite/assets/images/interval.png' %}"style="width: 20%;"/> Interval 1W');
+                    break;
+                case "MM":
+                    $("#graph_interval").html('<img src="{% static 'mainsite/assets/images/interval.png' %}"style="width: 20%;"/> Interval 1M');
+                    break;
+                case "YYYY":
+                    $("#graph_interval").html('<img src="{% static 'mainsite/assets/images/interval.png' %}"style="width: 20%;"/> Interval 1Y');
+                    break;
+            }
+        }
+
+        function changePeriodHistory(no) {
+            $("#chart_summary fieldset :input")[no].click();
+            for (var i = 2; i <= 10; i++) {
+                $("#predic_" + i).css("border-bottom", "");
+            }
+            $("#predic_" + no).css("border-bottom", "2px solid #5867dd");
+        }
+
+        function changePeriod(no) {
+            $("#history fieldset :input")[no].click();
+            for (var i = 2; i <= 10; i++) {
+                $("#period_" + i).css("border-bottom", "");
+            }
+            $("#period_" + no).css("border-bottom", "2px solid #5867dd");
+        }
+
+    </script>
+    <!-- // Plotly.js -->
+
+    <!--begin::Page Vendors -->
+    <script src="{% static 'mainsite/assets/vendors/custom/flot/flot.bundle.js' %}" type="text/javascript"></script>
+    <!--end::Page Vendors -->
+    <!--begin::Page Resources -->
+
+    <script type="text/javascript">
+        {% if request.user.is_authenticated %}
+            var date_change_cnt = 0;
+            // getting prediction data of the stock, according to selecting the Date
+            $('a.datepicker-trigger').datepicker({
+                format: "dd-mm-yyyy",
+                autoclose: true,
+                todayHighlight: true,
+            }).on('changeDate', function (e) {
+                date_change_cnt++;
+                var month = parseInt(e.date.getMonth()) + 1;
+
+                var mon = month.toString();
+                var day = e.date.getDate();
+                var year = e.date.getFullYear();
+
+                var date = e.date.getFullYear() + '-' + month.toString() + '-' + e.date.getDate();
+                var today = new Date();
+
+                if (year == today.getFullYear() && month == (today.getMonth() + 1) && day == today.getDate()) {
+                    $("#today_yesterday").html("Today:");
+                    $("#prediction_title").html("Today's Prediction");
+                }
+                else {
+                    $("#today_yesterday").html("");
+                    $("#prediction_title").html(year + "-" + mon + "-" + day + " Prediction");
+                }
+
+                $("#date").html(date);
+                console.log(date);
+                {#                if (date_change_cnt > 1) {#}
+                AjaxCall("{% url 'stock.ajax_stock_prediction' %}", "get", {
+                    'symbol': '{{stock.symbol}}',
+                    'date': date
+                }, function (e) {
+                    // total accuracy
+                    $("#total_accuracy").html(parseFloat(e.data.total_accuracy).toFixed(2) + "%");
+
+
+                    var content = '';
+                    {% if subscription_status %}
+
+                        if (e.data.stock_prediction) {
+                            // previous day accuracy
+                            $("#previous_day_accuracy").html(parseFloat(e.data.stock_prediction.accuracy_prev_day).toFixed(2) + "%");
+                            // drawing prediction data point
+                            var high_str = "Prediction High: " + e.data.stock_prediction.high;
+                            var low_str = "Prediction Low: " + e.data.stock_prediction.low;
+                            var close_str = "Prediction Close: " + e.data.stock_prediction.close;
+                            var prediction_stock_data = [];
+                            prediction_stock_data.push({
+                                date: new Date(year, mon, day),
+                                type: "sign",
+                                backgroundColor: e.data.high_color,
+                                graph: "g1",
+                                text: "H",
+                                description: high_str,
+                                value: e.data.stock_prediction.high
+                            });
+                            prediction_stock_data.push({
+                                date: new Date(year, mon, day),
+                                type: "sign",
+                                backgroundColor: e.data.low_color,
+                                graph: "g1",
+                                text: "L",
+                                description: low_str,
+                                value: e.data.stock_prediction.low
+                            });
+                            prediction_stock_data.push({
+                                date: new Date(year, mon, day),
+                                type: "sign",
+                                backgroundColor: e.data.close_color,
+                                graph: "g1",
+                                text: "C",
+                                description: close_str,
+                                value: e.data.stock_prediction.close
+                            });
+                            // set prediction_stock_data to stockEvents
+                            prediction_chart.dataSets[0].stockEvents = prediction_stock_data;
+                            {#                                prediction_chart.dataSets.stockEvents = prediction_stock_data#}
+                            prediction_chart.validateData()
+
+                            content = '<div class="col-sm-12 col-md-4">' +
+                                '<div class="m-portlet m-portlet--border-bottom-brand ">' +
+                                ' <div class="m-portlet__body" style="-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">' +
+                                '<div class="m-widget26">' +
+                                '<div class="m-widget26__number">' +
+                                '<span style="font-size: 28px" data-high>' + parseFloat(e.data.stock_prediction.low).toFixed(2) + '</span>' +
+                                '<small style="font-size: 16px;">Low</small>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '<div class="col-sm-12 col-md-4">' +
+                                '<div class="m-portlet m-portlet--border-bottom-danger ">' +
+                                '<div class="m-portlet__body" style="-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">' +
+                                '<div class="m-widget26">' +
+                                '<div class="m-widget26__number">' +
+                                '<span style="font-size: 28px" data-high>' + parseFloat(e.data.stock_prediction.high).toFixed(2) + '</span>' +
+                                '<small style="font-size: 16px;">High</small>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '<div class="col-sm-12 col-md-4">' +
+                                '<div class="m-portlet m-portlet--border-bottom-success ">' +
+                                '<div class="m-portlet__body" style="-webkit-box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08); box-shadow: 0 1px 15px 1px rgba(81, 77, 92, .08);">' +
+                                '<div class="m-widget26">' +
+                                '<div class="m-widget26__number">' +
+                                '<span style="font-size: 28px" data-high>' + parseFloat(e.data.stock_prediction.close).toFixed(2) + '</span>' +
+                                '<small style="font-size: 16px;">Close</small>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                        }
+                        else {
+                            $("#previous_day_accuracy").html("0 %");
+                            // set prediction_stock_data to stockEvents
+                            var temp = []
+                            prediction_chart.dataSets[0].stockEvents = temp;
+                            prediction_chart.validateData()
+                            content = '<div class="col-sm-12">' +
+                                '<div class="m-portlet m-portlet--border-bottom-prediction ">' +
+                                '<div class="m-portlet__body">' +
+                                '<div class="m-widget26" style="font-size:16px;">' +
+                                'No prediction is available for the selected' +
+                                'Date. Click <a href="#">here</a> to learn' +
+                                'why !' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                        }
+                        $("#prediction_body").html($.parseHTML(content));
+                    {% endif %}
+                }, function (e) {
+                    return console.log("Errorrr", e)
+                });
+                {#                }#}
+
+            });
+        {% endif %}
+        // Set today as current date
+        var date = new Date();
+        {#        var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());#}
+        {#        var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());#}
+        {#        jQuery('.datepicker-trigger').datepicker('setDate', today);#}
+        var today = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+        $("#today_yesterday").html("Today:");
+        $("#date").html(today);
+    </script>
+
+    <script type="text/javascript">
+        // Subscribing to stock
+        // Subscribe
+        jQuery('[data-subscription-trigger]').on('click', function (e) {
+            e.preventDefault();
+            var $this = $(this);
+            $this.addClass('loading');
+            // console.log("Clicked", e, $(this));
+            var stock_id = $(this).data('id');
+            var subscribe_status = $(this).attr('data-subscribe');
+            jQuery.ajax({
+                type: 'POST',
+                url: STOCK_SUBSCRIBE_URL,
+                data: {
+                    stock_id: stock_id,
+                    subscribe_status: subscribe_status
+                },
+                cache: false,
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                success: function (e) {
+                    // console.log("success", e)
+                    // Initially subscribed, turn on subscribe btn
+                    // console.log('status retutned', e.status);
+                    $this.removeAttr('data-subscribe')
+                    if (e.status) {
+                        $this.attr('data-subscribe', '1');
+                        $this.html('Subscribed');
+                        $this.addClass('btn-success');
+                        $this.removeClass('btn-danger loading');
+                    }
+                    else {
+                        $this.attr('data-subscribe', '0');
+                        $this.html('Subscribe');
+                        $this.removeClass('btn-success loading');
+                        $this.addClass('btn-danger');
+                    }
+
+                },
+                error: function (e) {
+                    console.log("Error", e);
+                }
+
+            });
+        })
+
+        // Subscribe
+        jQuery('button[data-fav-trigger]').on('click', function (e) {
+            e.preventDefault();
+            var $this = $(this);
+            console.log("Clicked", e, $(this));
+            var stock_id = $(this).data('id');
+            var favourite_status = $(this).attr('data-fav-status');
+            jQuery.ajax({
+                type: 'POST',
+                url: STOCK_FAVOURITE_URL,
+                data: {
+                    stock_id: stock_id,
+                    favourite_status: favourite_status
+                },
+                cache: false,
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                success: function (e) {
+                    console.log("success", e)
+                    // Initially subscribed, turn on subscribe btn
+                    console.log('status retutned', e.status);
+                    $this.removeAttr('data-subscribe')
+                    if (e.status) {
+                        $this.attr('data-fav-status', '1');
+                        $this.addClass('btn-info');
+                        $this.removeClass('btn-default');
+                    }
+                    else {
+                        $this.attr('data-fav-status', '0');
+                        $this.removeClass('btn-info');
+                        $this.addClass('btn-default');
+                    }
+
+                },
+                error: function (e) {
+                    console.log("Error", e);
+                }
+
+            });
+        })
+    </script>
+
+    <!--end::Page Resources -->
+{% endblock %}

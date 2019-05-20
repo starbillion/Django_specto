@@ -1,0 +1,75 @@
+{% extends 'mainsite/layouts/private/master-frontend-test.html' %}
+{#{% extends 'mainsite/layouts/private/master-frontend.html' %}#}
+{% load static %}
+{% load generic_filters %}
+{% load stocks_filters %}
+{% block content %}
+
+<div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body" style="padding: 25px;">
+
+    <!--begin:: Widgets/Stats-->
+    <div class="m-portlet" style="width:100%;">
+        <div class="m-portlet__body" style="width:100%">
+            <input type="hidden" value="all" id="sortMethod">
+            <input type="hidden" value="{{ page_name }}" id="pageName">
+            <input type="hidden" value="" id="searchTerm">
+            {% if sub_nav %}
+            <div class="row">
+                <div class="col-md-12" style="text-align: center;">
+                    {% include "stocks/snippets/sub_nav.html" %}
+                </div>
+            </div>
+            {% endif %}
+            {% if sort_required or search_required %}
+             <div class="row">
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div style="margin-top:25px;width:520px;margin-bottom:0px;" class="m-portlet">
+                         {% if sort_required %}
+                        <select class="form-control" name="order_select" id="orderSelect" style="display:inline;text-align: center;width:300px;">
+                            <option selected disabled value="">Order</option>
+                            <option value="cheapest_per_month">Cheapest Per Month</option>
+                            <option value="most_expensive_per_month">Most Expensive Per Month</option>
+                            <option value="highest_acc_prev_day">Highest Accuracy Prev Day</option>
+                            <option value="highest_acc_avg_all_time">Highest Accuracy Avg All Time</option>
+                            <option value="popularity">Popularity</option>
+                        </select>
+                        {% endif %}
+                            {% if search_required %}
+                        <input type="text" class="form-control" id="searchCards" placeholder="Search..." style="display:inline;width:200px;float:right;">
+                        {% endif %}
+                        </div>
+                    </div>
+            </div>
+            {% endif %}
+
+            <div class="row" id="cardContent">
+                {% for stock in all_stocks %}
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        {% include 'stocks/snippets/stock_card.html' %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-md-6 col-sm-12 col-xs-12">
+                    <div style="padding-left:500px;margin:auto;text-align: center;display: block;min-width:100%">
+                        <div id="pageLoaderDiv" class="m-loader m-loader--success hidden"
+                             style="width:100px;height:100px;margin: auto;"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--end:: Widgets/Stats-->
+
+</div>
+
+{% include "stocks/snippets/modal-cart.html" %}
+{% endblock %}
+{% block extraScripts %}
+    {% include "stocks/snippets/js_snippet.html" %}
+{% endblock %}

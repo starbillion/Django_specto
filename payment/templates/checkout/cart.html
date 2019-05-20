@@ -1,0 +1,130 @@
+{% extends 'mainsite/layouts/private/master-frontend-test.html' %}
+{% load static %}
+{% load generic_filters %}
+
+{% block extraStyles %}
+<style type="text/css">
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- begin::Body -->
+<div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+	<div class="m-grid__item m-grid__item--fluid m-wrapper">
+		
+		<!-- BEGIN: Subheader -->
+		<div class="m-subheader ">
+			<div class="d-flex align-items-center">
+				<div class="mr-auto">
+					<h3 class="m-subheader__title ">
+						Cart
+					</h3>
+				</div>
+			</div>
+		</div>
+		<!-- END: Subheader -->
+		
+		<div class="m-content">
+			<!--begin: Search Form -->
+			<div class="m-form m-form--label-align-right m--margin-top-20 m--margin-bottom-30">
+				<table class="table table-bordered">
+					<thead>
+						<tr>
+							<th colspan="3" class="text-center">Summary</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% if not cart %}
+							<tr><td colspan="3">No items in cart!</td></tr>
+						{% endif %}
+						{% for item in cart %}
+							<tr>
+								<td>{{item.stock.symbol}} <br><small> {{item.plan_duration}} month(s)</small></td>
+								<td>$<span data-item-price>{{item.price}}</span></td>
+								<td><a href="{% url 'payment.cart_remove_item'%}?duration={{item.plan_duration}}&product={{item.stock.pk}}" class="btn m-btn btn-danger btn-sm"><i class="fa fa-remove"></i> Remove {{item.product}}</a></td>
+							</tr>
+						{% endfor %}
+						{% if cart %}
+							<tr>
+								<th>Total(USD)</th>
+								<th colspan="2">$ <span data-cart-total></span></th>
+							</tr>
+						{% endif %}
+					</tbody>
+				</table>
+			</div>
+			{% if cart %}
+				<a href="{% url 'payment.cart_clear' %}" class="btn m-btn btn-warning">Clear Cart</a>
+				<a class="btn m-btn btn-info" href="{% url 'payment.checkout' %}" style="color: white;">Proceed to Checkout</a>
+			{% else %}
+				<a class="btn m-btn btn-info" href="{% url 'predictions:view_all_stocks_with_predictions' %}" style="color: white">Add more stock to cart</a>
+			{% endif %}
+		</div><!-- //m-content -->
+	
+	</div><!-- //m-wrapper -->
+</div>
+{% endblock %}
+
+
+{% block extraScripts %}
+<script type="text/javascript">
+	$(document).ready(function () {
+        var navListItems = $('div.setup-panel div a'),
+			allWells = $('.setup-content'),
+			allNextBtn = $('.nextBtn');
+
+		allWells.hide();
+		allWells.eq(0).show();
+
+		navListItems.click(function (e) {
+			e.preventDefault();
+			
+			var $target = $($(this).attr('href')),
+				$item = $(this);
+			
+			if ($item.attr('disabled') == 'disabled')
+				return;
+
+		  	if (!$item.hasClass('disabled')) {
+				navListItems.removeClass('btn-primary').addClass('btn-warning');
+				$item.removeClass('btn-warning').addClass('btn-primary');
+				allWells.hide();
+				$target.show();
+				$target.find('input:eq(0)').focus();
+		  	}
+		});
+
+		allNextBtn.click(function(e){ 
+		  	e.preventDefault();
+		  	var curStep = $(this).closest(".setup-content"),
+				curStepBtn = curStep.attr("id"),
+				nextStepWizard = $('div.setup-panel div a[href="#' + curStepBtn + '"]').parent().next().children("a"),
+				curInputs = curStep.find("input[type='text'],input[type='url']"),
+				isValid = true;
+
+		  	$(".form-group").removeClass("has-error");
+			for(var i=0; i<curInputs.length; i++){
+				if (!curInputs[i].validity.valid){
+			  		isValid = false;
+			  		$(curInputs[i]).closest(".form-group").addClass("has-error");
+				}
+			}
+
+		  	if (isValid)
+		    	nextStepWizard.removeAttr('disabled').trigger('click');
+		});
+
+		/**
+		 * Updating cart total
+		 */
+		var price = 0;
+		jQuery("[data-item-price]").each(function(key, val) {
+			price += parseFloat($(val).html());
+		})
+		jQuery("[data-cart-total").html(price.toFixed(2));
+		/**
+		 * Cart total update
+		 */
+	});
+</script>
+{% endblock %}

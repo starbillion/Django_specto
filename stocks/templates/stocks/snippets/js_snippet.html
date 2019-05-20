@@ -1,0 +1,540 @@
+<script type="text/javascript">
+    var CSRF_TOKEN = "{{csrf_token}}";
+    var STOCK_SUBSCRIBE_URL = "{% url 'subscription.subscribe_stock' %}";
+    var STOCK_FAVOURITE_URL = "{% url 'favourites.favourite_stock' %}";
+    var STOCK_ADD_TO_CART_URL = "{% url 'add_to_cart' %}";
+    var STOCK_GET_ACTIVE_SUBSCRIPTIONS = "{% url 'subscription.get_active_plans' %}";
+    var STOCK_HIDE_SUBSCRIPTION_URL = "{% url 'subscription.hide_stock' %}";
+    var STOCK_GOT_TO_CART_URL = "{% url 'payment.cart' %}";
+    var URL_STOCK_GET_LIST = "{% url 'stocks.get_list' %}";
+    var PAGE_INDEX = 1;
+    var NUM_PAGES = {{num_pages}};
+
+
+    // Subscribe
+    jQuery(document).on("click", "[data-trigger-load-stock]", function (e) {
+        e.preventDefault();
+        var $this = $(this);
+        console.log("Clicked", e, $(this));
+        var stock_id = $(this).data('id');
+        var subscribe_status = $(this).attr('data-subscribe');
+        jQuery.ajax({
+            type: 'POST',
+            url: STOCK_SUBSCRIBE_URL,
+            data: {
+                stock_id: stock_id,
+                subscribe_status: subscribe_status
+            },
+            cache: false,
+            headers: {
+                'X-CSRFToken': '{{csrf_token}}'
+            },
+            success: function (e) {
+                console.log("success", e)
+                // Initially subscribed, turn on subscribe btn
+                console.log('status retutned', e.status);
+                $this.removeAttr('data-subscribe')
+                if (e.status) {
+                    $this.attr('data-subscribe', '1');
+                    $this.html('Subscribed');
+                    $this.addClass('btn-success');
+                    $this.removeClass('btn-danger');
+                }
+                else {
+                    $this.attr('data-subscribe', '0');
+                    $this.html('Subscribe');
+                    $this.removeClass('btn-success');
+                    $this.addClass('btn-danger');
+                }
+
+            },
+            error: function (e) {
+                console.log("Error", e);
+            }
+
+        });
+    })
+
+    // Subscribe
+    jQuery(document).on('click', 'button[data-fav-trigger]', function (e) {
+
+        e.preventDefault();
+        var $this = $(this);
+        console.log("Clicked", e, $(this));
+        var stock_id = $(this).data('id');
+        var favourite_status = $(this).attr('data-fav-status');
+        jQuery.ajax({
+            type: 'POST',
+            url: STOCK_FAVOURITE_URL,
+            data: {
+                stock_id: stock_id,
+                favourite_status: favourite_status
+            },
+            cache: false,
+            headers: {
+                'X-CSRFToken': '{{csrf_token}}'
+            },
+            success: function (e) {
+                console.log("success", e)
+                // Initially subscribed, turn on subscribe btn
+                console.log('status retutned', e.status);
+                $this.removeAttr('data-subscribe')
+                if (e.status) {
+                    $this.attr('data-fav-status', '1');
+                    $this.addClass('btn-info');
+                    $this.removeClass('btn-default');
+                    //console.log('here');
+                    $this.find('.la-heart').css('background-color', '#ff4722');// ::hover{background-color: #ff4722}
+                    $this.find('.la-heart').css('font-color', '#ff4722');
+                    $this.find('.la-heart').css('color', '#ff4722');
+                }
+                else {
+                    $this.attr('data-fav-status', '0');
+                    $this.removeClass('btn-info');
+                    $this.addClass('btn-default');
+                    $this.find('.la-heart').css('background-color', 'transparent');
+                    $this.find('.la-heart').css('font-color', 'transparent');
+                    $this.find('.la-heart').css('color', 'transparent');
+                }
+
+            },
+            error: function (e) {
+                console.log("Error", e);
+            }
+
+        });
+        e.stopPropagation();
+    })
+
+    // Add to cart
+    jQuery(document).on('click', '[data-add-to-cart]', function (e) {
+        e.preventDefault();
+        var $this = $(this);
+        var stock_id = $(this).data('id');
+        var cart_status = $(this).attr('data-already-in-cart');
+        var qty = 1;
+        jQuery.ajax({
+            type: 'POST',
+            url: STOCK_ADD_TO_CART_URL,
+            data: {
+                product_id: stock_id,
+                quantity: qty,
+            },
+            cache: false,
+            headers: {
+                'X-CSRFToken': '{{csrf_token}}'
+            },
+            success: function (e) {
+                console.log("success", e)
+                // Initially subscribed, turn on subscribe btn
+                console.log('status retutned', e.status);
+                // $this.removeAttr('data-subscribe')
+
+                /*if (e.status){
+                 $this.attr('data-subscribe', '1');
+                 $this.html('Subscribed');
+                 $this.addClass('btn-success');
+                 $this.removeClass('btn-danger');
+                 }
+                 else
+                 {
+                 $this.attr('data-subscribe', '0');
+                 $this.html('Subscribe');
+                 $this.removeClass('btn-success');
+                 $this.addClass('btn-danger');
+                 }*/
+
+            },
+            error: function (e) {
+                console.log("Error", e);
+            }
+
+        });
+        e.stopPropagation();
+    })
+    jQuery(document).on('click', '[data-hide-trigger]', function (e) {
+        e.preventDefault();
+        AjaxCall(STOCK_HIDE_SUBSCRIPTION_URL, "post", {'stock_id': $(this).data('id')}, successHideSubscribedStock, errorHideSubscribedStock, {'$this': $(this)});
+    })
+
+    function successHideSubscribedStock(data, extraData) {
+        console.log("Success hide subscription stock", data, extraData);
+        if (data.status == '1') {
+            $(extraData.$this).parents('.stock-widget-wrap').hide('slow');
+        }
+    }
+
+    function errorHideSubscribedStock(data, extraData) {
+        console.log("Error hide subscription stock", data);
+        if (data.status == '1') {
+            $(extraData.$this).hide('slow');
+        }
+    }
+
+    jQuery(document).on("click", "[data-add-to-cart-modal]", function (e) {
+        e.preventDefault();
+        var symbol = $(this).attr('data-symbol');
+        var id = $(this).attr('data-id');
+        AjaxCall(STOCK_GET_ACTIVE_SUBSCRIPTIONS, "post", {'id': id}, successShowCartForm, errorShowCartForm, {
+            'symbol': symbol,
+            'id': id,
+            '$this': $(this)
+        });
+        e.stopPropagation();
+    })
+
+    // Cart form handlers
+    function successShowCartForm(data, extraData) {
+        targetModal = "#subsCartModal";
+
+        cartForm = jQuery("[data-add-to-cart-form]");
+        var plans = $.parseJSON(data.plans);
+        var symbol = extraData.symbol;
+        var id = extraData.id;
+
+        jQuery(cartForm).find("[data-symbol]").html(symbol);
+        priceFirstPlan = 'N.A';
+        plansHtml = "<center>";
+        if (plans.length > 0) {
+            jQuery(cartForm).find('form').removeClass('hidden');
+            jQuery(cartForm).find('[data-invalid-plans]').addClass('hidden');
+
+            for (var i = 0; i < plans.length; i++) {
+{#                plansHtml += "<label class='m-radio m-radio--solid'>";#}
+{#                plansHtml += "<input type='radio' name='plan_duration' value='" + plans[i].fields.plan_duration + "'";#}
+{#                if (i == 0)#}
+{#                    plansHtml += " checked='checked' ";#}
+{#                plansHtml += ">";#}
+{#                plansHtml += plans[i].fields.plan_duration + " month(s) @ $ " + plans[i].fields.price;#}
+{#                plansHtml += "<span></span>";#}
+{#                plansHtml += "</label>";#}
+
+                plansHtml += "<div style='cursor: pointer; width:110px; display: inline-block; margin-left: 13px; margin-right: 13px; margin-bottom: 20px;" +
+                    "-webkit-box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2); box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2);' " +
+                    "onclick='add_to_cart("+plans[i].pk+","+ plans[i].fields.plan_duration + ", 1, " + id + ",\"" + symbol + "\"" + ")'>" +
+                    "<div class='' style='background-color: #C6C6C6;padding:1rem 1.5rem 1rem 1.5rem;'>" +
+                    "<div class='m-widget26__number' style='color: #ffffff'>" +
+                    "<span style='font-size: 20px' data-high>" + plans[i].fields.plan_duration + " <font style='font-size:14px'>month</font></span></div></div>" +
+                    "<div style='padding:1.5rem 1.5rem 1.5rem 1.5rem; font-size:23px; color:#616161; font-weight: 500;'>$" + plans[i].fields.price + "</div></div>"
+
+
+                // plansHtml += "<option name='"+plans[i].fields.plan_duration+"' data-price='"+plans[i].fields.price+"' value='"+plans[i].fields.plan_duration+"''>"+ plans[i].fields.plan_duration +" month(s)</option>";
+
+            }
+            priceFirstPlan = plans[0].fields.price;
+        } else {
+            jQuery(cartForm).find('[data-invalid-plans]').removeClass('hidden');
+            jQuery(cartForm).find('form').addClass('hidden');
+        }
+        jQuery(cartForm).find('span[data-plan-price]').html(priceFirstPlan);
+        jQuery(cartForm).find('input[name="product_id"]').val(id);
+        jQuery(cartForm).find("[data-plans]").html(plansHtml + "</center>");
+        jQuery(cartForm).find("input[name='product_symbol']").val(symbol);
+        jQuery(targetModal).modal({
+            backdrop: false
+        });
+    }
+
+    function add_to_cart(id, plan_duration, quantity, product_id, product_symbol) {
+        var data = {
+            "id": id,
+            "plan_duration": plan_duration,
+            "quantity": quantity,
+            "product_id": product_id,
+            "product_symbol": product_symbol
+        }
+        AjaxCall(STOCK_ADD_TO_CART_URL, "post", data, successProductAddToCart, errorProductAddToCart, {'symbol': $(this).find('input[name="product_symbol"]').val()});
+
+    }
+
+    function errorShowCartForm(data, extraData) {
+        console.log("Success", data, extraData);
+    }
+
+    jQuery("select[data-plans]").on('change', function () {
+        jQuery('span[data-plan-price]').html(jQuery(this).find(":selected").data('price'));
+    })
+
+    jQuery("[data-add-to-cart-form] form").on('submit', function (e) {
+        e.preventDefault();
+        AjaxCall(STOCK_ADD_TO_CART_URL, "post", $(this).serialize(), successProductAddToCart, errorProductAddToCart, {'symbol': $(this).find('input[name="product_symbol"]').val()});
+    })
+
+    function successProductAddToCart(data, extraData) {
+        if (data.status == '1') {
+            $('#subsCartModal').modal('hide');
+            toastr.info(data.message);
+            updateCartIcon();
+            jQuery('.m-widget24__title').each(function (key, val) {
+                symbol = jQuery.trim(jQuery(val).html());
+                if (extraData.symbol.toLowerCase() == symbol.toLowerCase()) {
+                    jQuery(val).parents('.m-widget24__item').find('[data-add-to-cart-modal]').html('Go to cart').removeAttr('data-add-to-cart-modal').attr('href', STOCK_GOT_TO_CART_URL).off("click");
+                }
+            })
+        }
+        else{
+            toastr.info(data.message);
+        }
+    }
+
+    function errorProductAddToCart(data, extraData) {
+        console.log("error", data, extraData);
+    }
+
+
+    jQuery(document).on('click', ".cardId", function (ev) {
+
+        var url = $(this).attr('data-url');
+        var t = ev.srcElement || ev.target;
+        var className = $(t).attr('data-except-class');
+
+        if (className && className == 'subButton') {
+            return;
+        }
+        else {
+            window.location.href = url;
+        }
+
+    });
+    var URL_STOCK_GET_LIST = "{% url 'predictions:get_stocks_ajax' %}";
+    var PAGE_INDEX = 1;
+
+    var req = null;
+    // url, "post", {'page': page, 'page_name':pageName, 'sort_method':sortMethod, 'term': searchTerm}, successPageList, errorPageList
+    function search_func(url, method, data, callback, errorCallback, extraData) {
+        if (req != null) req.abort();
+        showAjaxLoader(true);
+        req = $.ajax({
+            url: url,
+            type: method,
+            data: data,
+            cache: false,
+            dataType: 'json',
+            headers: {
+                'X-CSRFToken': CSRF_TOKEN
+            },
+            success: function (s) {
+                // console.log("Success", s);
+                callback(s, extraData);
+                showAjaxLoader(false);
+            },
+            error: function (e) {
+                // console.log("Error", e);
+                errorCallback(e, extraData);
+                showAjaxLoader(false);
+            }
+
+        })
+    }
+    $(document).ready(function () {
+
+        //triggerLoad();
+        updateCard();
+        $("select[name='order_select']").change(function () {
+            //var pageName = $('#pageName').val();
+            //var sortMethod = $('#sortMethod').val();
+            PAGE_INDEX = 0;
+            $('#sortMethod').val($(this).val());
+            $('#cardContent').empty();
+            triggerLoad();
+        });
+        $("#searchCards").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $('#searchTerm').val(value);
+            PAGE_INDEX = 1;
+            $('#cardContent').empty();
+            //triggerLoad();
+            //$("#myTable tr").filter(function() {
+            //$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            //});
+            //showAjaxLoader(true);
+            var pageName = $('#pageName').val();
+            var sortMethod = $('#sortMethod').val();
+            var searchTerm = $('#searchTerm').val();
+            search_func(URL_STOCK_GET_LIST, "post", {
+                'page': 1,
+                'page_name': pageName,
+                'sort_method': sortMethod,
+                'term': searchTerm
+            }, successPageList, errorPageList)
+            //showAjaxLoader(false);
+        });
+
+        //showAjaxLoader(true);
+
+    });
+
+
+    /**
+     * Infinite scroll
+     */
+
+
+    var LOADING = null;
+    $(window).scroll(function () {
+
+        if (LOADING && LOADING == 1) {
+            //console.log('already loading', LOADING, PAGE_INDEX);
+            return;
+        }
+        //console.log(LOADING, PAGE_INDEX, NUM_PAGES);
+        if (PAGE_INDEX <= NUM_PAGES) {
+            var position = $(window).scrollTop();
+            var bottom = $(document).height() - $(window).height();
+            //console.log(position, bottom);
+
+            if (position + 50 > bottom) {
+                //PAGE_INDEX++;
+
+                var pageName = $('#pageName').val();
+                var sortMethod = $('#sortMethod').val();
+                var searchTerm = $('#searchTerm').val();
+                LOADING = 1;
+                //console.log("LOADING", LOADING);
+                loadMoreData(PAGE_INDEX, URL_STOCK_GET_LIST, pageName, sortMethod, searchTerm);
+
+            }
+        }
+        else {
+            console.log('max page');
+        }
+    });
+
+    function showAjaxLoader(show) {
+        if (show == true) {
+            //alert('hello');
+            $('#pageLoaderDiv').removeClass('hidden');
+        }
+        else {
+            $('#pageLoaderDiv').addClass('hidden');
+        }
+    }
+
+    function successPageList(data) {
+        console.log("Success", data);
+        showAjaxLoader(false);
+        var st = $('#searchTerm').val();
+        /*if (st.length > 0)
+         {
+         $('#cardContent').empty();
+         }*/
+        //$('.stock-widget-wrap-parent').append(data.html);
+        $(data.html_content).each(function (key, value) {
+            $('#cardContent').append('<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">' + value + '</div>');
+        });
+        updateCard();
+    }
+
+    function errorPageList(error) {
+        console.log("Error", error);
+        showAjaxLoader(false);
+    }
+    var req2 = null;
+    function loadMoreData(page, url, pageName, sortMethod, searchTerm) {
+        //console.log("loadMoreData");
+        showAjaxLoader(true);
+        //if (req2 != null) req2.abort();
+
+        PAGE_INDEX++;
+        //alert(PAGE_INDEX);
+        req2 = $.ajax({
+            url: url,
+            type: "POST",
+            data: {'page': PAGE_INDEX, 'page_name': pageName, 'sort_method': sortMethod, 'term': searchTerm},
+            cache: false,
+            dataType: 'json',
+            headers: {
+                'X-CSRFToken': CSRF_TOKEN
+            },
+            success: function (s) {
+                // console.log("Success", s);
+                successPageList(s, "");
+                LOADING = null;
+                //showAjaxLoader(false);
+            },
+            error: function (e) {
+                // console.log("Error", e);
+                errorPageList(e, "");
+                //showAjaxLoader(false);
+            }
+
+        })
+        //AjaxCall(url, "post", , successPageList, errorPageList);
+    }
+    function triggerLoad() {
+        var pageName = $('#pageName').val();
+        var sortMethod = $('#sortMethod').val();
+        var searchTerm = $('#searchTerm').val();
+        loadMoreData(1, URL_STOCK_GET_LIST, pageName, sortMethod, searchTerm);
+    }
+
+    function isCardAvailable(symbol) {
+        if ($('#cardContent').has('.stockSymbol:contains(' + symbol + ')').length) {
+            console.log(symbol + ' found');
+            return true;
+        }
+        else {
+            console.log(symbol + ' not found');
+            return false;
+        }
+    }
+    //var cardList = [];
+    var cardDict = {};
+    //var get_chat_data;
+    function updateCard() {
+
+        $(".cardId").each(function (index, element) {
+            var symbol = $(element).find('.stockSymbol').text()
+            if (isCardAvailable(symbol) == true) {
+                if (cardDict[symbol]) {
+                    console.log('Returning for', symbol);
+                    return;
+                }
+                else {
+                    console.log(symbol, 'not found in ', cardDict);
+                }
+                var get_chat_data = setInterval(function () {
+                    AjaxCall("{% url 'stock.ajax_stock_single' %}", "get", {
+                        'symbol': symbol,
+                    }, function (e) {
+                        var stats = e.data.stats;
+                        var stats_left = e.data.stats_left;
+                        $(element).find(".latestPrice").html(stats_left.latestPrice.toFixed(2));
+                        var tem = (stats_left.changePercent * 100).toFixed(2);
+                        if (tem > 0) {
+                            tem = "+" + tem;
+                        }
+                        $(element).find(".change").html("<font color='#707070'>USD </font>" + tem + " (" + stats_left.change.toFixed(2) + "%)");
+                        if (stats_left.change.toFixed(2) < 0) {
+                            $(element).find(".change").css("color", "#FF0000");
+                        }
+                        else {
+                            $(element).find(".change").css("color", "#009900");
+                        }
+                        if (isCardAvailable(symbol) == false) {
+                            clearInterval(cardDict[symbol]);
+                            delete cardDict[symbol]
+                        }
+                        //cardList.remove(symbol);
+                        //var index = cardList.indexOf(symbol);//item: the value which you want to remove
+
+                        //Method 1
+                        //cardList.splice(index,1);
+                    }, function (e) {
+                        return console.log("Errorrr", e)
+                    });
+
+
+                }, 20000);
+                cardDict[symbol] = get_chat_data;
+
+            }
+            else {
+                console.log('Deleting interval', cardDict[symbol]);
+                clearInterval(cardDict[symbol]);
+                delete cardDict[symbol]
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,654 @@
+{% extends 'mainsite/layouts/private/master-frontend-test.html' %}
+{% load static %}
+{% load generic_filters %}
+
+{% block extraStyles %}
+    <style type="text/css">
+        @media (min-width: 993px) {
+            .m-header--fixed .m-body {
+                padding-top: 100px !important;
+            }
+        }
+
+        .datepicker-trigger {
+            width: 70%;
+            max-height: 30px;
+        }
+
+        .datepicker-trigger input {
+            padding: 5px;
+            /*border: transparent;*/
+            /*display: inline-block	;*/
+        }
+
+        .no-left-margin {
+            /*margin-left: 0 !important;*/
+        }
+
+        /*input.datepicker-trigger{
+            border: transparent;
+        }*/
+        .stock-widget-wrap {
+            border: none !important;
+            border-right: none !important;
+            padding: 15px 20px !important;
+        }
+
+        .stock-wdget-wrap .m-widget24 {
+        }
+
+        .stock-widget-wrap:hover {
+            background-color: rgba(249, 249, 249, 0.99);
+            transition: all 300ms ease-in-out;
+        }
+
+        .load-more-btn {
+            margin: 0 auto;
+            cursor: pointer;
+        }
+
+        .m-widget24 .m-widget24__item .m-widget24__change {
+            margin-bottom: 0.22rem !important;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <!-- begin::Body -->
+    <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+        <!-- BEGIN: Left Aside -->
+        <button class="m-aside-left-close  m-aside-left-close--skin-dark " id="m_aside_left_close_btn">
+            <i class="la la-close"></i>
+        </button>
+
+        <!-- END: Left Aside -->
+        <div class="m-grid__item m-grid__item--fluid m-wrapper">
+            <!-- BEGIN: Subheader -->
+            <div class="m-subheader ">
+                <div class="d-flex align-items-center">
+                    <div class="mr-auto">
+                        <h3 class="m-subheader__title ">
+                            All Stocks
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Subheader -->
+            <div class="m-content">
+
+                <!--begin:: Widgets/Stats-->
+                <div class="m-portlet ">
+                    <div class="m-portlet__body  m-portlet__body--no-padding">
+                        <div class="row m-row--no-padding m-row--col-separator-xl stock-widget-wrap-parent">
+
+                            {% for stock in stocks %}
+
+                                {% check_if_subscribed_stock_hidden_by_user stock.id as subs_stock_hidden_by_user %}
+                                {% if not subs_stock_hidden_by_user %}
+
+                                    <div class="col-md-12 col-lg-6 col-xl-4 stock-widget-wrap"
+                                         data-style="border-bottom: solid 2px rgba(242,242,242,0.85); padding: 10px 5px;">
+                                        <!--begin::Total Profit-->
+                                        <div class="m-widget24">
+                                            <div class="m-widget24__item"
+                                                 data-predictions="{{ stock.stockprediction_set.select_related.all|to_json }}"
+                                                 data-id="{{ stock.pk }}">
+                                                <h4 class="m-widget24__title">
+                                                    {{ stock.symbol }}
+                                                </h4>
+
+                                                <br>
+                                                <span class="m-widget24__desc">
+												{{ stock.name }}
+											</span>
+                                                <span class="m-widget24__stats m--font-brand"
+                                                      data-accuracy-prev_day></span>
+
+                                                <div class="m--space-10"></div>
+                                                <div class="progress m-progress--sm">
+                                                    <div class="progress-bar m--bg-brand" role="progressbar"
+                                                         style="width: 78%;" aria-valuenow="50" aria-valuemin="0"
+                                                         aria-valuemax="100"></div>
+                                                </div>
+
+                                                <span class="m-widget24__change">
+												High <p data-high></p>
+											</span>
+                                                <span class="m-widget24__change">
+												Low <p data-low></p>
+											</span>
+                                                <span class="m-widget24__change">
+												Close <p data-close></p>
+											</span>
+
+                                                <div style="clear: both;"></div>
+                                                {% get_stock_subscription_status stock.id as subscription_status %}
+                                                {% get_stock_fav_status stock.id as fav_status %}
+                                                {% check_if_stock_in_cart stock.id as stock_in_cart %}
+                                                <span class="m-widget24__desc">
+												{% if fav_status %}
+                                                    <button href="#" {% if request.user.is_authenticated %}
+                                                            data-fav-trigger {% endif %} data-fav-status="1"
+                                                            class="btn  btn-info m-btn btn-sm" data-id="{{ stock.id }}"
+                                                            {% if not request.user.is_authenticated %}
+                                                            data-toggle="m-popover" data-content="Login required"
+                                                            data-placement="top"
+                                                            {% endif %}
+                                                     style="background-color: white; border-color: white;"><i class="la la-heart"></i></button>
+                                                {% else %}
+                                                    <button href="#" {% if request.user.is_authenticated %}
+                                                            data-fav-trigger {% endif %} data-fav-status="0"
+                                                            class="btn  btn-default m-btn btn-sm"
+                                                            data-id="{{ stock.id }}" data-id="{{ stock.id }}"
+                                                            {% if not request.user.is_authenticated %}
+                                                            data-toggle="m-popover" data-content="Login required"
+                                                            data-placement="top"
+                                                            {% endif %}
+                                                    ><i class="la la-heart"></i></button>
+                                                {% endif %}
+                                                    {% if subscription_status %}
+                                                        <a class="m-btn  btn btn-success btn-sm"
+                                                                {% if request.user.is_authenticated %}
+                                                           data-hide-trigger {% endif %} data-id="{{ stock.id }}"
+                                                           href="#" role="button" data-id="{{ stock.id }}"
+                                                                {% if not request.user.is_authenticated %}
+                                                           data-toggle="m-popover" data-content="Login required"
+                                                           data-placement="top"
+                                                                {% endif %}
+                                                        >
+														Hide
+													</a>
+                                                    {% else %}
+                                                        {% if stock_in_cart %}
+                                                            <a class="m-btn  btn btn-danger btn-sm" data-subscribe="0"
+                                                               data-id="{{ stock.id }}" href="{% url 'payment.cart' %}"
+                                                               role="button" data-id="{{ stock.id }}"
+                                                                    {% if not request.user.is_authenticated %}
+                                                               data-toggle="m-popover" data-content="Login required"
+                                                               data-placement="top"
+                                                                    {% endif %}
+                                                            >Go to cart</a>
+                                                        {% else %}
+                                                            <a class="m-btn  btn btn-danger btn-sm"
+                                                                    {% if request.user.is_authenticated %}
+                                                               data-add-to-cart-modal {% endif %}
+                                                               data-already-in-cart="0" data-subscribe="0"
+                                                               data-id="{{ stock.id }}" href="#" role="button"
+                                                               data-id="{{ stock.id }}"
+                                                                    {% if not request.user.is_authenticated %}
+                                                               data-toggle="m-popover" data-content="Login required"
+                                                               data-placement="top"
+                                                                    {% endif %}
+                                                            >Subscribe</a>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    <a class="m-btn  btn btn-info btn-sm"
+                                                       href="{% url 'stock.single' stock.symbol %}" role="button" style="color: white;">View
+												</a>
+
+											</span>
+                                                <div style="clear: both"></div>
+                                                <span class="m-widget24__change no-left-margin">
+												<div class='input-group date' id='m_datepicker_2'
+                                                     style="display: inline-flex; max-width:180px; margin-top: 10px;">
+													<input type="text" class="form-control m-input datepicker-trigger"
+                                                           readonly placeholder="Select date"/>
+													<span class="input-group-addon">
+														<i class="la la-calendar-check-o"></i>
+													</span>
+												</div>
+											</span>
+
+                                            </div>
+                                        </div>
+                                        <!--end::Total Profit-->
+                                    </div>
+
+                                {% endif %}
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </div>
+                <!--end:: Widgets/Stats-->
+
+                <div class="ajax-load text-center">
+                    <div style="text-align: center;">
+                        <button type="button" class="m-btn btn btn-sm btn-warning load-more-btn"
+                                data-trigger-load-stock>Load More
+                        </button>
+                    </div>
+                    <div class="m-loader m-loader--brand" style="width: 35px; display: none;" data-trigger-loader></div>
+                </div>
+
+                <div class="prev_next text-center hidden">
+                    <div class="pages">
+                        <ul class="pagination">
+                            {% if stocks.has_previous %}
+                                <li><a class="prev btn btn-info" href="?page={{ stocks.previous_page_number }}">Prev</a>
+                                </li>
+                            {% endif %}
+
+                            {% for pg in page_range %}
+                                {% if stocks.number == pg %}
+                                    <li><a href="?page={{ pg }}" class="btn btn-default">{{ pg }}</a></li>
+                                {% else %}
+                                    <li><a href="?page={{ pg }}" class="btn">{{ pg }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if stocks.has_next %}
+                                <li><a class="next btn btn-info" href="?page={{ stocks.next_page_number }}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <span class="clear_both"></span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {% include "stocks/snippets/modal-cart.html" %}
+
+    <!-- end:: Body -->
+{% endblock %}
+
+
+{% block extraScripts %}
+    <script type="text/javascript">
+        var CSRF_TOKEN = "{{csrf_token}}";
+        var STOCK_SUBSCRIBE_URL = "{% url 'subscription.subscribe_stock' %}";
+        var STOCK_FAVOURITE_URL = "{% url 'favourites.favourite_stock' %}";
+        var STOCK_ADD_TO_CART_URL = "{% url 'add_to_cart' %}";
+        var STOCK_GET_ACTIVE_SUBSCRIPTIONS = "{% url 'subscription.get_active_plans' %}";
+        var STOCK_HIDE_SUBSCRIPTION_URL = "{% url 'subscription.hide_stock' %}";
+        var STOCK_GOT_TO_CART_URL = "{% url 'payment.cart' %}";
+        var URL_STOCK_GET_LIST = "{% url 'stocks.get_list' %}";
+        var PAGE_INDEX = 1;
+        var PER_PAGE_STOCKS = {{ stocks|length }};
+
+        jQuery('body').on("focus", ".datepicker-trigger", function () {
+            // jQuery('.datepicker-trigger').datepicker({
+            // autoclose: true
+            $(this).datepicker({
+                autoclose: true,
+                // }).on('change', function(){
+
+            })
+                .on("select", function (formattedDate, date, inst) {
+                    $(inst.el).trigger('change');
+                })
+                .on("changeDate", function (e) {
+                    console.log("Change date requested");
+                    var month = parseInt(e.date.getMonth()) + 1;
+                    var date = e.date.getDate() + '-' + month.toString() + '-' + e.date.getFullYear();
+                    console.log("d changed", e)
+                    var $thisPrediction = jQuery(document).find(e.currentTarget).parents('.m-widget24__item').eq(0);
+
+                    var newHigh = newLow = newClose = 'No Forecast Available';
+                    newAccuracyPreviousDay = '';
+                    jQuery.each($thisPrediction.data('predictions'), function (key, val) {
+                        console.log("comparing", val.prediction_date, 'with', date)
+
+                        if (val.prediction_date == date) {
+                            // If matched date
+                            console.log('Changing', date)
+                            newHigh = val.high;
+                            newLow = val.low;
+                            newClose = val.close;
+                            newAccuracyPreviousDay = val.accuracy_prev_day;
+                        }
+                    })
+                    $thisPrediction.find('[data-low]').eq(0).html(newLow);
+                    $thisPrediction.find('[data-high]').eq(0).html(newHigh);
+                    $thisPrediction.find('[data-close]').eq(0).html(newClose);
+                    $thisPrediction.find('[data-accuracy-prev_day]').eq(0).html(newAccuracyPreviousDay);
+                    $(this).datepicker('hide');
+                });
+        })
+
+        // Set today as current date
+
+        var date = new Date();
+        var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        // jQuery(document).find('.datepicker-trigger').datepicker('setDate', today);
+        currMonth = parseInt(date.getMonth()) + 1;
+        var currDate = currMonth + "/" + date.getDate() + "/" + date.getFullYear();
+
+        jQuery(document)
+            .find('.datepicker-trigger')
+            .val(currDate);
+        initLoad();
+
+        function initLoad() {
+            var date = new Date();
+            var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            // jQuery(document).find('.datepicker-trigger').datepicker('setDate', today);
+            month = parseInt(date.getMonth()) + 1;
+            var currDate = currMonth + "/" + date.getDate() + "/" + date.getFullYear()
+
+            // var month = parseInt(e.date.getMonth())+1;
+            var date = date.getDate() + '-' + month.toString() + '-' + date.getFullYear();
+            // console.log("d changed", e)
+            jQuery('div.m-widget24__item').each(function (k, v) {
+                // var $thisPrediction = jQuery(document).find(e.currentTarget).parents('.m-widget24__item').eq(0);
+                var $thisPrediction = $(v);
+
+                var newHigh = newLow = newClose = 'No Forecast Available';
+                newAccuracyPreviousDay = '';
+
+                jQuery.each($thisPrediction.data('predictions'), function (key, val) {
+                    console.log("comparing", val.prediction_date, 'with', date)
+
+                    if (val.prediction_date == date) {
+                        // If matched date
+                        console.log('Changing', date)
+                        newHigh = val.high;
+                        newLow = val.low;
+                        newClose = val.close;
+                        newAccuracyPreviousDay = val.accuracy_prev_day;
+                    }
+                })
+                $thisPrediction.find('[data-low]').eq(0).html(newLow);
+                $thisPrediction.find('[data-high]').eq(0).html(newHigh);
+                $thisPrediction.find('[data-close]').eq(0).html(newClose);
+                $thisPrediction.find('[data-accuracy-prev_day]').eq(0).html(newAccuracyPreviousDay);
+            });
+        }
+
+        // Subscribe
+        jQuery(document).on("click", "[data-trigger-load-stock]", function (e) {
+            e.preventDefault();
+            var $this = $(this);
+            console.log("Clicked", e, $(this));
+            var stock_id = $(this).data('id');
+            var subscribe_status = $(this).attr('data-subscribe');
+            jQuery.ajax({
+                type: 'POST',
+                url: STOCK_SUBSCRIBE_URL,
+                data: {
+                    stock_id: stock_id,
+                    subscribe_status: subscribe_status
+                },
+                cache: false,
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                success: function (e) {
+                    console.log("success", e)
+                    // Initially subscribed, turn on subscribe btn
+                    console.log('status retutned', e.status);
+                    $this.removeAttr('data-subscribe')
+                    if (e.status) {
+                        $this.attr('data-subscribe', '1');
+                        $this.html('Subscribed');
+                        $this.addClass('btn-success');
+                        $this.removeClass('btn-danger');
+                    }
+                    else {
+                        $this.attr('data-subscribe', '0');
+                        $this.html('Subscribe');
+                        $this.removeClass('btn-success');
+                        $this.addClass('btn-danger');
+                    }
+
+                },
+                error: function (e) {
+                    console.log("Error", e);
+                }
+
+            });
+        })
+
+        // Subscribe
+        jQuery(document).on('click', 'button[data-fav-trigger]', function (e) {
+
+            e.preventDefault();
+            var $this = $(this);
+            console.log("Clicked", e, $(this));
+            var stock_id = $(this).data('id');
+            var favourite_status = $(this).attr('data-fav-status');
+            jQuery.ajax({
+                type: 'POST',
+                url: STOCK_FAVOURITE_URL,
+                data: {
+                    stock_id: stock_id,
+                    favourite_status: favourite_status
+                },
+                cache: false,
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                success: function (e) {
+                    console.log("success", e)
+                    // Initially subscribed, turn on subscribe btn
+                    console.log('status retutned', e.status);
+                    $this.removeAttr('data-subscribe')
+                    if (e.status) {
+                        $this.attr('data-fav-status', '1');
+                        $this.addClass('btn-info');
+                        $this.removeClass('btn-default');
+                    }
+                    else {
+                        $this.attr('data-fav-status', '0');
+                        $this.removeClass('btn-info');
+                        $this.addClass('btn-default');
+                    }
+
+                },
+                error: function (e) {
+                    console.log("Error", e);
+                }
+
+            });
+        })
+
+        // Add to cart
+        jQuery('[data-add-to-cart]').on('click', function (e) {
+            e.preventDefault();
+            var $this = $(this);
+            var stock_id = $(this).data('id');
+            var cart_status = $(this).attr('data-already-in-cart');
+            var qty = 1;
+            jQuery.ajax({
+                type: 'POST',
+                url: STOCK_ADD_TO_CART_URL,
+                data: {
+                    product_id: stock_id,
+                    quantity: qty,
+                },
+                cache: false,
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                success: function (e) {
+                    console.log("success", e)
+                    // Initially subscribed, turn on subscribe btn
+                    console.log('status retutned', e.status);
+                    // $this.removeAttr('data-subscribe')
+
+                    /*if (e.status){
+                     $this.attr('data-subscribe', '1');
+                     $this.html('Subscribed');
+                     $this.addClass('btn-success');
+                     $this.removeClass('btn-danger');
+                     }
+                     else
+                     {
+                     $this.attr('data-subscribe', '0');
+                     $this.html('Subscribe');
+                     $this.removeClass('btn-success');
+                     $this.addClass('btn-danger');
+                     }*/
+
+                },
+                error: function (e) {
+                    console.log("Error", e);
+                }
+
+            });
+        })
+        jQuery(document).on('click', '[data-hide-trigger]', function (e) {
+            e.preventDefault();
+            AjaxCall(STOCK_HIDE_SUBSCRIPTION_URL, "post", {'stock_id': $(this).data('id')}, successHideSubscribedStock, errorHideSubscribedStock, {'$this': $(this)});
+        })
+
+        function successHideSubscribedStock(data, extraData) {
+            console.log("Success hide subscription stock", data, extraData);
+            if (data.status == '1') {
+                $(extraData.$this).parents('.stock-widget-wrap').hide('slow');
+            }
+        }
+
+        function errorHideSubscribedStock(data, extraData) {
+            console.log("Error hide subscription stock", data);
+            if (data.status == '1') {
+                $(extraData.$this).hide('slow');
+            }
+        }
+
+        jQuery(document).on("click", "[data-add-to-cart-modal]", function (e) {
+            e.preventDefault();
+            var symbol = $(this).parents('.m-widget24__item').find('h4.m-widget24__title').html().trim();
+            var id = $(this).parents('.m-widget24__item').data('id');
+            AjaxCall(STOCK_GET_ACTIVE_SUBSCRIPTIONS, "post", {'id': id}, successShowCartForm, errorShowCartForm, {
+                'symbol': symbol,
+                'id': id,
+                '$this': $(this)
+            });
+        })
+
+        // Cart form handlers
+        function successShowCartForm(data, extraData) {
+            targetModal = "#subsCartModal";
+
+            cartForm = jQuery("[data-add-to-cart-form]");
+            var plans = $.parseJSON(data.plans);
+            var symbol = extraData.symbol;
+            var id = extraData.id;
+
+            jQuery(cartForm).find("[data-symbol]").html(symbol);
+            priceFirstPlan = 'N.A';
+            plansHtml = "<center>";
+            if (plans.length > 0) {
+                jQuery(cartForm).find('form').removeClass('hidden');
+                jQuery(cartForm).find('[data-invalid-plans]').addClass('hidden');
+
+                for (var i = 0; i < plans.length; i++) {
+                    plansHtml += "<div style='cursor: pointer; width:110px; display: inline-block; margin-left: 13px; margin-right: 13px; margin-bottom: 20px;" +
+                        "-webkit-box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2); box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2);' " +
+                        "onclick='add_to_cart(" + plans[i].pk + "," + plans[i].fields.plan_duration + ", 1, " + id + ",\"" + symbol + "\"" + ")'>" +
+                        "<div class='' style='background-color: #C6C6C6;padding:1rem 1.5rem 1rem 1.5rem;'>" +
+                        "<div class='m-widget26__number' style='color: #ffffff'>" +
+                        "<span style='font-size: 20px' data-high>" + plans[i].fields.plan_duration + " <font style='font-size:14px'>month</font></span></div></div>" +
+                        "<div style='padding:1.5rem 1.5rem 1.5rem 1.5rem; font-size:23px; color:#616161; font-weight: 500;'>$" + plans[i].fields.price + "</div></div>"
+
+                }
+                priceFirstPlan = plans[0].fields.price;
+            } else {
+                jQuery(cartForm).find('[data-invalid-plans]').removeClass('hidden');
+                jQuery(cartForm).find('form').addClass('hidden');
+            }
+            jQuery(cartForm).find('span[data-plan-price]').html(priceFirstPlan);
+            jQuery(cartForm).find('input[name="product_id"]').val(id);
+            jQuery(cartForm).find("[data-plans]").html(plansHtml + "</center>");
+            jQuery(cartForm).find("input[name='product_symbol']").val(symbol);
+            jQuery(targetModal).modal({
+                backdrop: false
+            });
+        }
+        function add_to_cart(id, plan_duration, quantity, product_id, product_symbol) {
+            var data = {
+                "id": id,
+                "plan_duration": plan_duration,
+                "quantity": quantity,
+                "product_id": product_id,
+                "product_symbol": product_symbol
+            }
+            AjaxCall(STOCK_ADD_TO_CART_URL, "post", data, successProductAddToCart, errorProductAddToCart, {'symbol': $(this).find('input[name="product_symbol"]').val()});
+
+        }
+        function errorShowCartForm(data, extraData) {
+            console.log("Success", data, extraData);
+        }
+
+        jQuery("select[data-plans]").on('change', function () {
+            jQuery('span[data-plan-price]').html(jQuery(this).find(":selected").data('price'));
+        })
+
+        jQuery("[data-add-to-cart-form] form").on('submit', function (e) {
+            e.preventDefault();
+            AjaxCall(STOCK_ADD_TO_CART_URL, "post", $(this).serialize(), successProductAddToCart, errorProductAddToCart, {'symbol': $(this).find('input[name="product_symbol"]').val()});
+        })
+
+        function successProductAddToCart(data, extraData) {
+            if (data.status == '1') {
+                $('#subsCartModal').modal('hide');
+                toastr.info(data.message)
+                jQuery('.m-widget24__title').each(function (key, val) {
+                    symbol = jQuery.trim(jQuery(val).html());
+                    if (extraData.symbol.toLowerCase() == symbol.toLowerCase()) {
+                        jQuery(val).parents('.m-widget24__item').find('[data-add-to-cart-modal]').html('Go to cart').removeAttr('data-add-to-cart-modal').attr('href', STOCK_GOT_TO_CART_URL).off("click");
+                    }
+                })
+            }
+        }
+
+        function errorProductAddToCart(data, extraData) {
+            console.log("error", data, extraData);
+        }
+
+        /**
+         * Infinite scroll
+         */
+        jQuery(document).on('click', '[data-trigger-load-stock]', function (e) {
+            PAGE_INDEX++;
+            loadMoreData(PAGE_INDEX, URL_STOCK_GET_LIST);
+        })
+        /*$(window).scroll(function() {
+         if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
+         // var last_id = $(".post-id:last").attr("id");
+         PAGE_INDEX++;
+         loadMoreData(PAGE_INDEX, URL_STOCK_GET_LIST);
+         console.log(PAGE_INDEX, "=page index");
+         }
+         });*/
+
+        function showAjaxLoader(show=true) {
+            btnCss = 'block';
+            loaderCss = 'none';
+            if (show) {
+                loaderCss = 'inline-block';
+                btnCss = 'none';
+            }
+            jQuery('[data-trigger-loader]').css('display', loaderCss);
+            jQuery('[data-trigger-load-stock]').css('display', btnCss);
+        }
+
+        function successPageList(data) {
+            console.log("Success", data);
+            showAjaxLoader(false);
+            $('.stock-widget-wrap-parent').append(data.html);
+            jQuery(document).find('.stock-widget-wrap-parent .datepicker-trigger').each(function (key, value) {
+                if ((key + 1) > ((PAGE_INDEX - 1) * PER_PAGE_STOCKS)) {
+                    console.log("Applying", key, value, PAGE_INDEX);
+                    $(value).datepicker('setDate', today);
+                } else {
+                    console.log("Skipping", key, value, PAGE_INDEX);
+                }
+            });
+        }
+
+        function errorPageList(error) {
+            console.log("Error", error);
+            showAjaxLoader(false);
+        }
+
+        function loadMoreData(page, url) {
+            showAjaxLoader();
+            AjaxCall(url, "post", {'page': page}, successPageList, errorPageList);
+        }
+    </script>
+{% endblock %}

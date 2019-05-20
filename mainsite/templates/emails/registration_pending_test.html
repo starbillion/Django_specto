@@ -1,0 +1,5 @@
+{% autoescape off %}
+Hi {{ user.get_short_name }},
+    we are delighted to have you onboard.
+    Please click http://{{ domain }}{% url 'registration_verify' token=user.get_email_verification_token %}" to complete the registration process
+{% endautoescape %}

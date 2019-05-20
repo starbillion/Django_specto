@@ -1,0 +1,567 @@
+{% extends 'mainsite/layouts/private/master-frontend-test.html' %}
+{#{% extends 'mainsite/layouts/private/master-frontend.html' %}#}
+{% load static %}
+{% load generic_filters %}
+{% load stocks_filters %}
+{% block content %}
+    <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body"
+         style="padding: 25px;">
+
+        <!--begin:: Widgets/Stats-->
+        <div class="m-portlet" style="width:100%;">
+            <div class="m-portlet__body" style="width:100%">
+                {% if request.user.is_authenticated %}
+                    {% if subscriptions %}
+
+
+                        <div class="row">
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                <h4 class="m-subheader__title" data-url="{% url 'my-subscriptions' %}">Subscribed</h4>
+                                <br>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            {% for stock in subscriptions %}
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                    {% include 'stocks/snippets/stock_card.html' %}
+                                </div>
+
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if favorites %}
+                        <div class="row" style="margin-top:55px;">
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                <h4 class="m-subheader__title" data-url="{% url 'my-favourites' %}">Watchlist</h4><br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            {% for stock in favorites %}
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 watchlistCard">
+
+                                    {% include 'stocks/snippets/stock_card.html' %}
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+                    {% endif %}
+                {% endif %}
+                {% if recommendations1 or recommendations2 %}
+                    <div class="row" style="margin-top:55px;">
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                            <h4 class="m-subheader__title" data-url="{% url 'stock.most_popular' %}">Recommended for
+                                you</h4><br>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% if recommendations1 %}
+
+                            {% for stock in recommendations1 %}
+
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                    {% include 'stocks/snippets/stock_card.html' %}
+                                </div>
+
+                            {% endfor %}
+
+                        {% endif %}
+                        {% if recommendations2 %}
+
+                            {% for stock in recommendations2 %}
+
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                    {% include 'stocks/snippets/stock_card.html' %}
+                                </div>
+
+                            {% endfor %}
+
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% include "stocks/snippets/modal-cart.html" %}
+{% endblock %}
+{% block extraStyles %}
+    <style type="text/css">
+        h4.m-subheader__title {
+            font-weight: 200;
+        }
+
+        @media (min-width: 993px) {
+            h4.m-subheader__title {
+                margin-left: -30px;
+                margin-bottom: -30px;
+                cursor: pointer;
+            }
+        }
+    </style>
+{% endblock %}
+{% block extraScripts %}
+    <script type="text/javascript">
+        var CSRF_TOKEN = "{{csrf_token}}";
+        var STOCK_SUBSCRIBE_URL = "{% url 'subscription.subscribe_stock' %}";
+        var STOCK_FAVOURITE_URL = "{% url 'favourites.favourite_stock' %}";
+        var STOCK_ADD_TO_CART_URL = "{% url 'add_to_cart' %}";
+        var STOCK_GET_ACTIVE_SUBSCRIPTIONS = "{% url 'subscription.get_active_plans' %}";
+        var STOCK_HIDE_SUBSCRIPTION_URL = "{% url 'subscription.hide_stock' %}";
+        var STOCK_GOT_TO_CART_URL = "{% url 'payment.cart' %}";
+        var URL_STOCK_GET_LIST = "{% url 'stocks.get_list' %}";
+        var PAGE_INDEX = 1;
+        var PER_PAGE_STOCKS = {{ stocks|length }};
+
+        jQuery('body').on("focus", ".datepicker-trigger", function () {
+            // jQuery('.datepicker-trigger').datepicker({
+            // autoclose: true
+            $(this).datepicker({
+                autoclose: true,
+                // }).on('change', function(){
+
+            })
+                .on("select", function (formattedDate, date, inst) {
+                    $(inst.el).trigger('change');
+                })
+                .on("changeDate", function (e) {
+                    console.log("Change date requested");
+                    var month = parseInt(e.date.getMonth()) + 1;
+                    var date = e.date.getDate() + '-' + month.toString() + '-' + e.date.getFullYear();
+                    console.log("d changed", e)
+                    var $thisPrediction = jQuery(document).find(e.currentTarget).parents('.m-widget24__item').eq(0);
+
+                    var newHigh = newLow = newClose = 'No Forecast Available';
+                    newAccuracyPreviousDay = '';
+                    jQuery.each($thisPrediction.data('predictions'), function (key, val) {
+                        console.log("comparing", val.prediction_date, 'with', date)
+
+                        if (val.prediction_date == date) {
+                            // If matched date
+                            console.log('Changing', date)
+                            newHigh = val.high;
+                            newLow = val.low;
+                            newClose = val.close;
+                            newAccuracyPreviousDay = val.accuracy_prev_day;
+                        }
+                    })
+                    $thisPrediction.find('[data-low]').eq(0).html(newLow);
+                    $thisPrediction.find('[data-high]').eq(0).html(newHigh);
+                    $thisPrediction.find('[data-close]').eq(0).html(newClose);
+                    $thisPrediction.find('[data-accuracy-prev_day]').eq(0).html(newAccuracyPreviousDay);
+                    $(this).datepicker('hide');
+                });
+        })
+
+        // Set today as current date
+
+        var date = new Date();
+        var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        // jQuery(document).find('.datepicker-trigger').datepicker('setDate', today);
+        currMonth = parseInt(date.getMonth()) + 1;
+        var currDate = currMonth + "/" + date.getDate() + "/" + date.getFullYear();
+
+        jQuery(document)
+            .find('.datepicker-trigger')
+            .val(currDate);
+        initLoad();
+
+        function initLoad() {
+            var date = new Date();
+            var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            // jQuery(document).find('.datepicker-trigger').datepicker('setDate', today);
+            month = parseInt(date.getMonth()) + 1;
+            var currDate = currMonth + "/" + date.getDate() + "/" + date.getFullYear()
+
+            // var month = parseInt(e.date.getMonth())+1;
+            var date = date.getDate() + '-' + month.toString() + '-' + date.getFullYear();
+            // console.log("d changed", e)
+            jQuery('div.m-widget24__item').each(function (k, v) {
+                // var $thisPrediction = jQuery(document).find(e.currentTarget).parents('.m-widget24__item').eq(0);
+                var $thisPrediction = $(v);
+
+                var newHigh = newLow = newClose = 'No Forecast Available';
+                newAccuracyPreviousDay = '';
+
+                jQuery.each($thisPrediction.data('predictions'), function (key, val) {
+                    console.log("comparing", val.prediction_date, 'with', date)
+
+                    if (val.prediction_date == date) {
+                        // If matched date
+                        console.log('Changing', date)
+                        newHigh = val.high;
+                        newLow = val.low;
+                        newClose = val.close;
+                        newAccuracyPreviousDay = val.accuracy_prev_day;
+                    }
+                })
+                $thisPrediction.find('[data-low]').eq(0).html(newLow);
+                $thisPrediction.find('[data-high]').eq(0).html(newHigh);
+                $thisPrediction.find('[data-close]').eq(0).html(newClose);
+                $thisPrediction.find('[data-accuracy-prev_day]').eq(0).html(newAccuracyPreviousDay);
+            });
+        }
+
+        // Subscribe
+        jQuery(document).on("click", "[data-trigger-load-stock]", function (e) {
+            e.preventDefault();
+            var $this = $(this);
+            console.log("Clicked", e, $(this));
+            var stock_id = $(this).data('id');
+            var subscribe_status = $(this).attr('data-subscribe');
+            jQuery.ajax({
+                type: 'POST',
+                url: STOCK_SUBSCRIBE_URL,
+                data: {
+                    stock_id: stock_id,
+                    subscribe_status: subscribe_status
+                },
+                cache: false,
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                success: function (e) {
+                    console.log("success", e)
+                    // Initially subscribed, turn on subscribe btn
+                    console.log('status retutned', e.status);
+                    $this.removeAttr('data-subscribe')
+                    if (e.status) {
+                        $this.attr('data-subscribe', '1');
+                        $this.html('Subscribed');
+                        $this.addClass('btn-success');
+                        $this.removeClass('btn-danger');
+                    }
+                    else {
+                        $this.attr('data-subscribe', '0');
+                        $this.html('Subscribe');
+                        $this.removeClass('btn-success');
+                        $this.addClass('btn-danger');
+                    }
+
+                },
+                error: function (e) {
+                    console.log("Error", e);
+                }
+
+            });
+        })
+
+        // Subscribe
+        jQuery(document).on('click', 'button[data-fav-trigger]', function (e) {
+
+            e.preventDefault();
+            var $this = $(this);
+            console.log("Clicked", e, $(this));
+            var stock_id = $(this).data('id');
+            var favourite_status = $(this).attr('data-fav-status');
+            jQuery.ajax({
+                type: 'POST',
+                url: STOCK_FAVOURITE_URL,
+                data: {
+                    stock_id: stock_id,
+                    favourite_status: favourite_status
+                },
+                cache: false,
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                success: function (e) {
+                    console.log("success", e)
+                    // Initially subscribed, turn on subscribe btn
+                    console.log('status retutned', e.status);
+                    $this.removeAttr('data-subscribe')
+                    if (e.status) {
+                        $this.attr('data-fav-status', '1');
+                        $this.addClass('btn-info');
+                        $this.removeClass('btn-default');
+                        $this.find('.la-heart').css('background-color', '#ff4722');// ::hover{background-color: #ff4722}
+                        $this.find('.la-heart').css('font-color', '#ff4722');
+                        $this.find('.la-heart').css('color', '#ff4722');
+                    }
+                    else {
+                        $this.attr('data-fav-status', '0');
+                        $this.removeClass('btn-info');
+                        $this.addClass('btn-default');
+                        $this.find('.la-heart').css('background-color', 'transparent');
+                        $this.find('.la-heart').css('font-color', 'transparent');
+                        $this.find('.la-heart').css('color', 'transparent');
+                        $this.parents(".watchlistCard").remove();
+                    }
+
+                },
+                error: function (e) {
+                    console.log("Error", e);
+                }
+
+            });
+            e.stopPropagation();
+        })
+
+        // Add to cart
+        jQuery('[data-add-to-cart]').on('click', function (e) {
+            e.preventDefault();
+            var $this = $(this);
+            var stock_id = $(this).data('id');
+            var cart_status = $(this).attr('data-already-in-cart');
+            var qty = 1;
+            jQuery.ajax({
+                type: 'POST',
+                url: STOCK_ADD_TO_CART_URL,
+                data: {
+                    product_id: stock_id,
+                    quantity: qty,
+                },
+                cache: false,
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                success: function (e) {
+                    console.log("success", e)
+                    // Initially subscribed, turn on subscribe btn
+                    console.log('status retutned', e.status);
+                    // $this.removeAttr('data-subscribe')
+
+                    /*if (e.status){
+                     $this.attr('data-subscribe', '1');
+                     $this.html('Subscribed');
+                     $this.addClass('btn-success');
+                     $this.removeClass('btn-danger');
+                     }
+                     else
+                     {
+                     $this.attr('data-subscribe', '0');
+                     $this.html('Subscribe');
+                     $this.removeClass('btn-success');
+                     $this.addClass('btn-danger');
+                     }*/
+
+                },
+                error: function (e) {
+                    console.log("Error", e);
+                }
+
+            });
+            e.stopPropagation();
+        })
+        jQuery(document).on('click', '[data-hide-trigger]', function (e) {
+            e.preventDefault();
+            AjaxCall(STOCK_HIDE_SUBSCRIPTION_URL, "post", {'stock_id': $(this).data('id')}, successHideSubscribedStock, errorHideSubscribedStock, {'$this': $(this)});
+        })
+
+        function successHideSubscribedStock(data, extraData) {
+            console.log("Success hide subscription stock", data, extraData);
+            if (data.status == '1') {
+                $(extraData.$this).parents('.stock-widget-wrap').hide('slow');
+            }
+        }
+
+        function errorHideSubscribedStock(data, extraData) {
+            console.log("Error hide subscription stock", data);
+            if (data.status == '1') {
+                $(extraData.$this).hide('slow');
+            }
+        }
+
+        jQuery(document).on("click", "[data-add-to-cart-modal]", function (e) {
+            e.preventDefault();
+            var symbol = $(this).attr('data-symbol');
+            var id = $(this).attr('data-id');
+            AjaxCall(STOCK_GET_ACTIVE_SUBSCRIPTIONS, "post", {'id': id}, successShowCartForm, errorShowCartForm, {
+                'symbol': symbol,
+                'id': id,
+                '$this': $(this)
+            });
+            e.stopPropagation();
+        })
+
+        // Cart form handlers
+        function successShowCartForm(data, extraData) {
+            targetModal = "#subsCartModal";
+
+            cartForm = jQuery("[data-add-to-cart-form]");
+            var plans = $.parseJSON(data.plans);
+            var symbol = extraData.symbol;
+            var id = extraData.id;
+
+            jQuery(cartForm).find("[data-symbol]").html(symbol);
+            priceFirstPlan = 'N.A';
+            plansHtml = "<center>";
+            if (plans.length > 0) {
+                jQuery(cartForm).find('form').removeClass('hidden');
+                jQuery(cartForm).find('[data-invalid-plans]').addClass('hidden');
+
+                for (var i = 0; i < plans.length; i++) {
+
+                    plansHtml += "<div style='cursor: pointer; width:110px; display: inline-block; margin-left: 13px; margin-right: 13px; margin-bottom: 20px;" +
+                        "-webkit-box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2); box-shadow: 0 0px 17px 3px rgba(0, 0, 0, .2);' " +
+                        "onclick='add_to_cart(" + plans[i].pk + "," + plans[i].fields.plan_duration + ", 1, " + id + ",\"" + symbol + "\"" + ")'>" +
+                        "<div class='' style='background-color: #C6C6C6;padding:1rem 1.5rem 1rem 1.5rem;'>" +
+                        "<div class='m-widget26__number' style='color: #ffffff'>" +
+                        "<span style='font-size: 20px' data-high>" + plans[i].fields.plan_duration + " <font style='font-size:14px'>month</font></span></div></div>" +
+                        "<div style='padding:1.5rem 1.5rem 1.5rem 1.5rem; font-size:23px; color:#616161; font-weight: 500;'>$" + plans[i].fields.price + "</div></div>"
+
+
+                }
+                priceFirstPlan = plans[0].fields.price;
+            } else {
+                jQuery(cartForm).find('[data-invalid-plans]').removeClass('hidden');
+                jQuery(cartForm).find('form').addClass('hidden');
+            }
+            jQuery(cartForm).find('span[data-plan-price]').html(priceFirstPlan);
+            jQuery(cartForm).find('input[name="product_id"]').val(id);
+            jQuery(cartForm).find("[data-plans]").html(plansHtml + "</center>");
+            jQuery(cartForm).find("input[name='product_symbol']").val(symbol);
+            jQuery(targetModal).modal({
+                backdrop: false
+            });
+        }
+
+        function add_to_cart(id, plan_duration, quantity, product_id, product_symbol) {
+            var data = {
+                "id": id,
+                "plan_duration": plan_duration,
+                "quantity": quantity,
+                "product_id": product_id,
+                "product_symbol": product_symbol
+            }
+            AjaxCall(STOCK_ADD_TO_CART_URL, "post", data, successProductAddToCart, errorProductAddToCart, {'symbol': $(this).find('input[name="product_symbol"]').val()});
+
+        }
+
+        function errorShowCartForm(data, extraData) {
+            console.log("Success", data, extraData);
+        }
+
+        jQuery("select[data-plans]").on('change', function () {
+            jQuery('span[data-plan-price]').html(jQuery(this).find(":selected").data('price'));
+        })
+
+        jQuery("[data-add-to-cart-form] form").on('submit', function (e) {
+            e.preventDefault();
+            AjaxCall(STOCK_ADD_TO_CART_URL, "post", $(this).serialize(), successProductAddToCart, errorProductAddToCart, {'symbol': $(this).find('input[name="product_symbol"]').val()});
+        })
+
+        function successProductAddToCart(data, extraData) {
+            if (data.status == '1') {
+                $('#subsCartModal').modal('hide');
+                toastr.info(data.message)
+                updateCartIcon();
+                jQuery('.m-widget24__title').each(function (key, val) {
+                    symbol = jQuery.trim(jQuery(val).html());
+                    if (extraData.symbol.toLowerCase() == symbol.toLowerCase()) {
+                        jQuery(val).parents('.m-widget24__item').find('[data-add-to-cart-modal]').html('Go to cart').removeAttr('data-add-to-cart-modal').attr('href', STOCK_GOT_TO_CART_URL).off("click");
+                    }
+                })
+            }
+            else {
+                toastr.info(data.message)
+            }
+        }
+
+        function errorProductAddToCart(data, extraData) {
+            console.log("error", data, extraData);
+        }
+
+        /**
+         * Infinite scroll
+         */
+        jQuery(document).on('click', '[data-trigger-load-stock]', function (e) {
+            PAGE_INDEX++;
+            loadMoreData(PAGE_INDEX, URL_STOCK_GET_LIST);
+        })
+
+        /*$(window).scroll(function() {
+         if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
+         // var last_id = $(".post-id:last").attr("id");
+         PAGE_INDEX++;
+         loadMoreData(PAGE_INDEX, URL_STOCK_GET_LIST);
+         console.log(PAGE_INDEX, "=page index");
+         }
+         });*/
+
+        function showAjaxLoader(show=true) {
+            btnCss = 'block';
+            loaderCss = 'none';
+            if (show) {
+                loaderCss = 'inline-block';
+                btnCss = 'none';
+            }
+            jQuery('[data-trigger-loader]').css('display', loaderCss);
+            jQuery('[data-trigger-load-stock]').css('display', btnCss);
+        }
+
+        function successPageList(data) {
+            console.log("Success", data);
+            showAjaxLoader(false);
+            $('.stock-widget-wrap-parent').append(data.html);
+            jQuery(document).find('.stock-widget-wrap-parent .datepicker-trigger').each(function (key, value) {
+                if ((key + 1) > ((PAGE_INDEX - 1) * PER_PAGE_STOCKS)) {
+                    console.log("Applying", key, value, PAGE_INDEX);
+                    $(value).datepicker('setDate', today);
+                } else {
+                    console.log("Skipping", key, value, PAGE_INDEX);
+                }
+            });
+        }
+
+        function errorPageList(error) {
+            console.log("Error", error);
+            showAjaxLoader(false);
+        }
+
+        function loadMoreData(page, url) {
+            showAjaxLoader();
+            AjaxCall(url, "post", {'page': page}, successPageList, errorPageList);
+        }
+
+        $(".cardId").on('click', function (ev) {
+            var url = $(this).attr('data-url');
+            var t = ev.srcElement || ev.target;
+            var className = $(t).attr('data-except-class');
+
+            if (className && className == 'subButton') {
+                return;
+            }
+            else {
+                window.location.href = url;
+            }
+
+        });
+
+        $(document).ready(function () {
+            $("h4.m-subheader__title").on('click', function (ev) {
+                var url = $(this).attr('data-url');
+                window.location.href = url;
+            });
+            $(".cardId").each(function (index, element) {
+                var get_chat_data = setInterval(function () {
+                    AjaxCall("{% url 'stock.ajax_stock_single' %}", "get", {
+                        'symbol': $(element).find('.stockSymbol').text(),
+                    }, function (e) {
+                        var stats = e.data.stats;
+                        var stats_left = e.data.stats_left;
+                        $(element).find(".latestPrice").html(stats_left.latestPrice.toFixed(2));
+                        var tem = (stats_left.changePercent * 100).toFixed(2);
+                        if (tem > 0) {
+                            tem = "+" + tem;
+                        }
+                        $(element).find(".change").html("<font color='#707070'>USD </font>" + tem + " (" + stats_left.change.toFixed(2) + "%)");
+                        if (stats_left.change.toFixed(2) < 0) {
+                            $(element).find(".change").css("color", "#FF0000");
+                        }
+                        else {
+                            $(element).find(".change").css("color", "#009900");
+                        }
+                    }, function (e) {
+                        return console.log("Errorrr", e)
+                    })
+                }, 20000);
+            });
+        });
+    </script>
+
+{% endblock %}

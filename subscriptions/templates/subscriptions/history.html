@@ -1,0 +1,147 @@
+{% extends 'mainsite/layouts/private/master-frontend-test.html' %}
+{% load static %}
+{% load generic_filters %}
+
+{% block extraStyles %}
+    <style type="text/css">
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- begin::Body -->
+    <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+        <div class="m-grid__item m-grid__item--fluid m-wrapper">
+            <div class="m-content">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <!--begin:: Widgets/Sale Reports-->
+                        <div class="m-portlet m-portlet--full-height ">
+                            <div class="m-portlet__head">
+                                <div class="m-portlet__head-caption">
+                                    <div class="m-portlet__head-title">
+                                        <h3 class="m-portlet__head-text">
+                                            History of Predictions & Subscriptions &nbsp;<button
+                                                class="m-btn btn btn-info btn-sm" data-trigger="print"
+                                                style="color:white;">Print
+                                        </button>
+                                        </h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m-portlet__body">
+                                <!--Begin::Tab Content-->
+                                <div class="tab-content">
+                                    <!--begin::tab 1 content-->
+                                    <div class="tab-pane active" id="m_widget11_tab1_content">
+                                        <!--begin::Widget 11-->
+                                        <div class="m-widget11">
+                                            <div class="table-responsive printHtml">
+                                                <!--begin::Table-->
+                                                <table class="table">
+                                                    <!--begin::Thead-->
+                                                    <thead>
+                                                    <tr>
+                                                        <td class="m-widget11__label" style="">
+                                                            #
+                                                        </td>
+                                                        <td style="width: 10%;">
+                                                            Transaction ID
+                                                        </td>
+                                                        <td style="width: 10%;">
+                                                            Transaction Type
+                                                        </td>
+                                                        <td style="width: 15%;">
+                                                            Date Paid
+                                                        </td>
+                                                        <td style="width: 20%;">
+                                                            Stock
+                                                        </td>
+                                                        <td style="width: 30%;">
+                                                            From - To
+                                                        </td>
+                                                        <td style="width: 8%;">
+                                                            Month(s)
+                                                        </td>
+                                                        <td style="width: 8%;">
+                                                            Amount Paid
+                                                        </td>
+                                                    </tr>
+                                                    </thead>
+                                                    <!--end::Thead-->
+                                                    <!--begin::Tbody-->
+                                                    <tbody>
+
+                                                    {% for hist in hists %}
+                                                        <tr>
+                                                            <td>
+                                                                <span>{{ hist.id }}</span>
+                                                            </td>
+                                                            <td>
+                                                                {{ hist.transaction_id }}
+                                                            </td>
+                                                            <td>
+                                                                {{ hist.transaction_type }}
+                                                            </td>
+                                                            <td>
+                                                                {{ hist.created_at }}
+                                                            </td>
+                                                            <td>
+                                                                <span class="m-widget11__title">
+                                                                    {{ hist.stock_name }}
+                                                                </span>
+                                                                <span class="m-widget11__sub">
+                                                                    {{ hist.stock_symbol }}
+                                                                </span>
+                                                            </td>
+
+                                                            <td>
+                                                                {{ hist.subscription_started }}
+                                                                - {{ hist.subscription_ends }}
+                                                            </td>
+                                                            <td>
+                                                                {{ hist.purchased_months }} month(s)
+                                                            </td>
+                                                            <td style="color: #716aca; width: 10%;">
+                                                                ${{ hist.total_price }}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                    <!--end::Tbody-->
+                                                </table>
+                                                <!--end::Table-->
+                                            </div>
+                                        </div>
+                                        <!--end::Widget 11-->
+                                    </div>
+                                    <!--end::tab 1 content-->
+                                </div>
+                                <!--End::Tab Content-->
+                            </div>
+                        </div>
+                        <!--end:: Widgets/Sale Reports-->
+                    </div>
+                </div>
+            </div><!-- //m-content -->
+
+        </div><!-- //m-wrapper -->
+    </div>
+{% endblock %}
+
+
+{% block extraScripts %}
+    <script type="text/javascript">
+        jQuery("[data-trigger]").on("click", function () {
+            printData();
+        })
+
+        function printData() {
+            var htmlToPrint = $(".printHtml").html();
+            newWin = window.open("");
+            newWin.document.write(htmlToPrint);
+            newWin.print();
+            newWin.close();
+        }
+
+    </script>
+{% endblock %}
